@@ -3,10 +3,12 @@ cmake_minimum_required (VERSION 3.8)
 set(SRCS 
 	Compute.h
 	Compute.cpp
-	DescriptorHandler.h
-	DescriptorHandler.cpp
-	DPoolLayoutFactory.h
-	DPoolLayoutFactory.cpp
+	DPoolHandler.h
+	DPoolHandler.cpp
+	DSetlLayoutFactory.h
+	DSetLayoutFactory.cpp
+	LoadShaderModule.h
+	LoadShaderModule.cpp
 )
 
 add_library(PipelineHandler ${SRCS})

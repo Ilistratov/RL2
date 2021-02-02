@@ -36,7 +36,10 @@ inline BindingInfo::BindingInfo(const T& t, vk::ShaderStageFlags stage) {
 }
 
 template<>
-inline BindingInfo::BindingInfo(const ResourceHandler::StructuredBuffer& buff, vk::ShaderStageFlags stage) : stage(stage) {
+inline BindingInfo::BindingInfo(
+	const ResourceHandler::StructuredBuffer& buff,
+	vk::ShaderStageFlags stage
+) : stage(stage) {
 	bufferInfo = {
 		vk::DescriptorBufferInfo{
 			buff.getBufferData().buff,
@@ -48,23 +51,24 @@ inline BindingInfo::BindingInfo(const ResourceHandler::StructuredBuffer& buff, v
 	type = vk::DescriptorType::eStorageBuffer;
 }
 
-class DPoolLayoutFactory {
+class DSetLayoutFactory {
 	std::vector<BindingInfo> bindings;
 
 public:
-	DPoolLayoutFactory(uint64_t reservedSize = 0);
+	DSetLayoutFactory(uint64_t reservedSize = 0);
 	
 	template<typename T>
 	void addBinding(const T& t, vk::ShaderStageFlags visibleAt);
 
 	std::vector<vk::DescriptorSetLayoutBinding>&& genLayoutBindings() const;
-	std::vector<vk::WriteDescriptorSet>&& genDescriptorWrites(const std::vector<vk::DescriptorSet>& dSets) const;
-	std::vector<vk::DescriptorPoolSize>&& genPoolSizes() const;
+	std::vector<vk::WriteDescriptorSet>&& genDescriptorWrites(vk::DescriptorSet dSet) const;
+	std::unordered_map<vk::DescriptorType, uint64_t>&& genPoolSizes() const;
 };
 
 template<typename T>
-inline void DPoolLayoutFactory::addBinding(const T& t, vk::ShaderStageFlags visibleAt) {
+inline void DSetLayoutFactory::addBinding(const T& t, vk::ShaderStageFlags visibleAt) {
 	bindings.push_back(BindingInfo<T>(t, visibleAt));
+	bindings.back().bindingId = bindings.size() - 1;
 }
 
 }

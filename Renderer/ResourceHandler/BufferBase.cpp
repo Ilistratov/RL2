@@ -45,18 +45,10 @@ BufferBase::BufferBase(
 }
 
 DataComponent::BufferData& BufferBase::getBufferData() {
-	if (bufferDataId == UINT64_MAX) {
-		return DataComponent::BufferData();
-	}
-
 	return core.getBuffers()[bufferDataId];
 }
 
 const DataComponent::BufferData& BufferBase::getBufferData() const {
-	if (bufferDataId == UINT64_MAX) {
-		return DataComponent::BufferData();
-	}
-
 	return core.getBuffers()[bufferDataId];
 }
 

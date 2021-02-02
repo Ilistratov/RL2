@@ -22,6 +22,8 @@ class RendererCore {
 	std::vector<DataComponent::CommandPoolData> cmdPools;
 	std::vector<DataComponent::DescriptorPoolData> dPools;
 
+	std::vector<DataComponent::PipelineData> pplns;
+
 public:
 	RendererCore(RendererCore const&) = delete;
 	RendererCore operator =(RendererCore const&) = delete;
@@ -36,6 +38,7 @@ public:
 
 	std::vector<DataComponent::BufferData>& getBuffers();
 	std::vector<DataComponent::DescriptorPoolData>& getDescriptorPools();
+	std::vector<DataComponent::PipelineData>& getPipelines();
 
 	template<typename T>
 	inline void destroyDataComponent(T& component) {
@@ -68,6 +71,8 @@ inline void RendererCore::destroyDataComponent(DataComponent::ImageData& compone
 	device().freeMemory(component.mem);
 }
 
+//safety/sanity sacrificed to convenience
+//for INTERNAL use ONLY
 extern RendererCore core;
 
 }

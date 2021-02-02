@@ -1,6 +1,6 @@
 #include <unordered_map>
 
-#include "DPoolLayoutFactory.h"
+#include "DSetlLayoutFactory.h"
 
 namespace Renderer::Pipeline {
 
@@ -10,8 +10,6 @@ uint64_t BindingInfo::getDescriptorCount() const {
 }
 
 vk::WriteDescriptorSet BindingInfo::getWrite() const {
-	
-
 	vk::WriteDescriptorSet res;
 
 	res.dstBinding = bindingId;
@@ -32,11 +30,11 @@ vk::DescriptorSetLayoutBinding BindingInfo::getLayoutBinding() const {
 	return res;
 }
 
-DPoolLayoutFactory::DPoolLayoutFactory(uint64_t reservedSize = 0) {
+DSetLayoutFactory::DSetLayoutFactory(uint64_t reservedSize = 0) {
 	bindings.reserve(reservedSize);
 }
 
-std::vector<vk::DescriptorSetLayoutBinding>&& DPoolLayoutFactory::genLayoutBindings() const {
+std::vector<vk::DescriptorSetLayoutBinding>&& DSetLayoutFactory::genLayoutBindings() const {
 	std::vector<vk::DescriptorSetLayoutBinding> res;
 	res.reserve(bindings.size());
 	
@@ -47,35 +45,26 @@ std::vector<vk::DescriptorSetLayoutBinding>&& DPoolLayoutFactory::genLayoutBindi
 	return std::move(res);
 }
 
-std::vector<vk::WriteDescriptorSet>&& DPoolLayoutFactory::genDescriptorWrites(const std::vector<vk::DescriptorSet>& dSets) const {
+std::vector<vk::WriteDescriptorSet>&& DSetLayoutFactory::genDescriptorWrites(vk::DescriptorSet dSet) const {
 	std::vector<vk::WriteDescriptorSet> res;
 	res.reserve(bindings.size());
-	uint64_t dSetInd = 0;
 
 	for (const auto& bnd : bindings) {
 		res.push_back(bnd.getWrite());
-		res.back().dstSet = dSets[dSetInd];
-		++dSetInd;
+		res.back().dstSet = dSet;
 	}
 
 	return std::move(res);
 }
 
-std::vector<vk::DescriptorPoolSize>&& DPoolLayoutFactory::genPoolSizes() const {
-	std::vector<vk::DescriptorPoolSize> res;
+std::unordered_map<vk::DescriptorType, uint64_t>&& DSetLayoutFactory::genPoolSizes() const {
 	std::unordered_map<vk::DescriptorType, uint64_t> dCnt;
 
 	for (const auto& bnd : bindings) {
 		dCnt[bnd.type] += bnd.getDescriptorCount();
 	}
 
-	res.reserve(dCnt.size());
-	
-	for (const auto& [type, cnt] : dCnt) {
-		res.push_back(vk::DescriptorPoolSize{ type, cnt });
-	}
-
-	return std::move(res);
+	return std::move(dCnt);
 }
 
 }
