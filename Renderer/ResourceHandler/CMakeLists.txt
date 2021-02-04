@@ -5,6 +5,8 @@ set(SRCS
 	BufferBase.cpp
 	StructuredBuffer.h
 	StructuredBuffer.cpp
+	ImageBase.h
+	ImageBase.cpp
 )
 
 add_library(ResourceHandler ${SRCS})

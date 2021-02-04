@@ -37,6 +37,7 @@ public:
 	SwapchainHndl& swapchain();
 
 	std::vector<DataComponent::BufferData>& getBuffers();
+	std::vector<DataComponent::ImageData>& getImages();
 	std::vector<DataComponent::DescriptorPoolData>& getDescriptorPools();
 	std::vector<DataComponent::PipelineData>& getPipelines();
 

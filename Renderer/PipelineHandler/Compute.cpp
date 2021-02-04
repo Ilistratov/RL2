@@ -14,8 +14,8 @@ Compute::Compute(
 		core.getPipelines().push_back({});
 	}
 
-	PipelineDataId = reservedPipelineDataId;
-	DataComponent::PipelineData& data = core.getPipelines()[PipelineDataId];
+	pipelineDataId = reservedPipelineDataId;
+	DataComponent::PipelineData& data = core.getPipelines()[pipelineDataId];
 
 	data.layt = core.device().createPipelineLayout(
 		vk::PipelineLayoutCreateInfo{
@@ -54,6 +54,10 @@ Compute::Compute(
 	}
 
 	data.ppln = res.value;
+}
+
+DataComponent::PipelineData& Compute::getData() {
+	return core.getPipelines()[pipelineDataId];
 }
 
 }

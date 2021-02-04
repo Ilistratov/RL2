@@ -12,7 +12,7 @@
 namespace Renderer::Pipeline {
 
 class Compute {
-	uint64_t PipelineDataId = UINT64_MAX;
+	uint64_t pipelineDataId = UINT64_MAX;
 	//TODO create pipeline using DescriptorHandler for layout creation
 
 public:
@@ -24,6 +24,8 @@ public:
 		const std::string& shaderMain,
 		uint64_t reservedPipelineDataId = UINT64_MAX
 	);
+
+	DataComponent::PipelineData& getData();
 };
 
 }

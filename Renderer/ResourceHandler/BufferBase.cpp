@@ -14,7 +14,7 @@ BufferBase::BufferBase(
 			vk::BufferCreateFlags{},
 			sz,
 			usage,
-			vk::SharingMode::eExclusive, //TODO make it configurable
+			vk::SharingMode::eExclusive, //TODO make it configurable ???
 			{},
 			{}
 		}
