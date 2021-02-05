@@ -55,4 +55,65 @@ DataComponent::ImageData& ImageBase::getData() {
 	return core.getImages()[imageDataId];
 }
 
+vk::ImageMemoryBarrier ImageBase::genLayoutTransitionBarrier(
+	vk::CommandBuffer cb,
+	vk::ImageLayout srcLayt,
+	vk::ImageLayout dstLayt,
+	vk::AccessFlags srcAccess,
+	vk::AccessFlags dstAccess
+) {
+	return vk::ImageMemoryBarrier{
+		srcAccess,
+		dstAccess,
+		srcLayt,
+		dstLayt,
+		{VK_QUEUE_FAMILY_IGNORED},
+		{VK_QUEUE_FAMILY_IGNORED},
+		getData().img,
+		vk::ImageSubresourceRange{
+			vk::ImageAspectFlagBits::eColor,
+			0,
+			1,
+			0,
+			1
+		}
+	};
+}
+
+vk::ImageMemoryBarrier ImageBase::genTransferSrcBarrier(
+	vk::CommandBuffer cb,
+	vk::ImageLayout srcLayt
+) {
+	return genLayoutTransitionBarrier(
+		cb,
+		srcLayt,
+		vk::ImageLayout::eTransferSrcOptimal,
+		vk::AccessFlagBits::eShaderWrite,
+		vk::AccessFlagBits::eTransferRead
+	);
+}
+
+vk::ImageMemoryBarrier ImageBase::genTransferDstBarrier(
+	vk::CommandBuffer cb,
+	vk::ImageLayout srcLayt
+) {
+	return genLayoutTransitionBarrier(
+		cb,
+		srcLayt,
+		vk::ImageLayout::eTransferDstOptimal,
+		vk::AccessFlagBits::eShaderRead,	// doesn't have eShaderWrite since writing to the data that we are going to
+		vk::AccessFlagBits::eTransferWrite	// overwrite is somthing strange and it shouldn't happen anyway
+	);
+}
+
+vk::ImageMemoryBarrier ImageBase::genShaderRWBarrier(vk::CommandBuffer cb, vk::ImageLayout srcLayt) {
+	return genLayoutTransitionBarrier(
+		cb,
+		srcLayt,
+		vk::ImageLayout::eGeneral,
+		vk::AccessFlagBits::eTransferRead | vk::AccessFlagBits::eTransferWrite,
+		vk::AccessFlagBits::eShaderRead | vk::AccessFlagBits::eShaderWrite
+	);
+}
+
 }

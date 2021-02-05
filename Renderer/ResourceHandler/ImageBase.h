@@ -17,6 +17,30 @@ public:
 	);
 	
 	DataComponent::ImageData& getData();
+
+	vk::ImageMemoryBarrier genLayoutTransitionBarrier(
+		vk::CommandBuffer cb,
+		vk::ImageLayout srcLayt,
+		vk::ImageLayout dstLayt,
+		vk::AccessFlags srcAccess,
+		vk::AccessFlags dstAccess
+	);
+
+	vk::ImageMemoryBarrier genTransferSrcBarrier(
+		vk::CommandBuffer cb,
+		vk::ImageLayout srcLayt
+	);
+
+	vk::ImageMemoryBarrier genTransferDstBarrier(
+		vk::CommandBuffer cb,
+		vk::ImageLayout srcLayt
+	);
+
+	vk::ImageMemoryBarrier genShaderRWBarrier(
+		vk::CommandBuffer cb,
+		vk::ImageLayout srcLayt
+	);
+
 };
 
 }

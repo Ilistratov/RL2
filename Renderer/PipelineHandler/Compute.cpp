@@ -15,7 +15,7 @@ Compute::Compute(
 	}
 
 	pipelineDataId = reservedPipelineDataId;
-	DataComponent::PipelineData& data = core.getPipelines()[pipelineDataId];
+	auto& data = core.getPipelines()[pipelineDataId];
 
 	data.layt = core.device().createPipelineLayout(
 		vk::PipelineLayoutCreateInfo{

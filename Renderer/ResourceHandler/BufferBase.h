@@ -17,8 +17,8 @@ public:
 		uint64_t reservedBufferDataId = UINT64_MAX
 	);
 
-	DataComponent::BufferData& getBufferData();
-	const DataComponent::BufferData& getBufferData() const;
+	DataComponent::BufferData& getData();
+	const DataComponent::BufferData& getData() const;
 };
 
 }

@@ -7,9 +7,17 @@ BufferBase::BufferBase(
 	vk::BufferUsageFlags usage,
 	vk::MemoryPropertyFlags memoryProperties,
 	uint64_t reservedBufferDataId) {
+	if (reservedBufferDataId == UINT64_MAX) {
+		reservedBufferDataId = core.getBuffers().size();
+		core.getBuffers().push_back({});
+	}
+	
+	bufferDataId = reservedBufferDataId;
 	auto device = core.device();
 
-	auto buff = device.createBuffer(
+	auto& data = getData();
+
+	data.buff = device.createBuffer(
 		vk::BufferCreateInfo{
 			vk::BufferCreateFlags{},
 			sz,
@@ -20,35 +28,24 @@ BufferBase::BufferBase(
 		}
 	);
 
-	auto mem_requierments = device.getBufferMemoryRequirements(buff);
-	auto mem = device.allocateMemory(
+	auto mem_requierments = device.getBufferMemoryRequirements(data.buff);
+	
+	data.sz = mem_requierments.size;
+	data.mem = device.allocateMemory(
 		vk::MemoryAllocateInfo{
 			mem_requierments.size,
 			core.apiBase().findMemoryTypeIndex(mem_requierments.memoryTypeBits, memoryProperties)
 		}
 	);
 
-
-	device.bindBufferMemory(buff, mem, 0);
-
-	if (reservedBufferDataId == UINT64_MAX) {
-		reservedBufferDataId = core.getBuffers().size();
-		core.getBuffers().push_back({});
-	}
-	bufferDataId = reservedBufferDataId;
-	
-	core.getBuffers()[bufferDataId] = DataComponent::BufferData{
-		mem,
-		buff,
-		sz
-	};
+	device.bindBufferMemory(data.buff, data.mem, 0);
 }
 
-DataComponent::BufferData& BufferBase::getBufferData() {
+DataComponent::BufferData& BufferBase::getData() {
 	return core.getBuffers()[bufferDataId];
 }
 
-const DataComponent::BufferData& BufferBase::getBufferData() const {
+const DataComponent::BufferData& BufferBase::getData() const {
 	return core.getBuffers()[bufferDataId];
 }
 
