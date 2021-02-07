@@ -7,7 +7,8 @@ ImageBase::ImageBase(
 	vk::Format fmt,
 	vk::ImageUsageFlags usage,
 	vk::MemoryPropertyFlags memoryProperties,
-	uint64_t reservedImageDataId
+	uint64_t reservedImageDataId,
+	vk::ImageLayout initialLayout
 ) {
 	if (reservedImageDataId == UINT64_MAX) {
 		reservedImageDataId = core.getImages().size();
@@ -33,7 +34,7 @@ ImageBase::ImageBase(
 			vk::SharingMode::eExclusive, //TODO make it configurable ???
 			0,
 			nullptr,
-			vk::ImageLayout::eUndefined
+			initialLayout
 		}
 	);
 	
@@ -55,8 +56,26 @@ DataComponent::ImageData& ImageBase::getData() {
 	return core.getImages()[imageDataId];
 }
 
+vk::ImageSubresourceLayers ImageBase::getSubresourceLayers() const {
+	return vk::ImageSubresourceLayers{
+		vk::ImageAspectFlagBits::eColor,
+		0,
+		0,
+		1
+	};
+}
+
+vk::ImageSubresourceRange ImageBase::getSubresourceRange() const {
+	return vk::ImageSubresourceRange{
+		vk::ImageAspectFlagBits::eColor,
+		0,
+		1,
+		0,
+		1
+	};
+}
+
 vk::ImageMemoryBarrier ImageBase::genLayoutTransitionBarrier(
-	vk::CommandBuffer cb,
 	vk::ImageLayout srcLayt,
 	vk::ImageLayout dstLayt,
 	vk::AccessFlags srcAccess,
@@ -81,11 +100,9 @@ vk::ImageMemoryBarrier ImageBase::genLayoutTransitionBarrier(
 }
 
 vk::ImageMemoryBarrier ImageBase::genTransferSrcBarrier(
-	vk::CommandBuffer cb,
 	vk::ImageLayout srcLayt
 ) {
 	return genLayoutTransitionBarrier(
-		cb,
 		srcLayt,
 		vk::ImageLayout::eTransferSrcOptimal,
 		vk::AccessFlagBits::eShaderWrite,
@@ -94,11 +111,9 @@ vk::ImageMemoryBarrier ImageBase::genTransferSrcBarrier(
 }
 
 vk::ImageMemoryBarrier ImageBase::genTransferDstBarrier(
-	vk::CommandBuffer cb,
 	vk::ImageLayout srcLayt
 ) {
 	return genLayoutTransitionBarrier(
-		cb,
 		srcLayt,
 		vk::ImageLayout::eTransferDstOptimal,
 		vk::AccessFlagBits::eShaderRead,	// doesn't have eShaderWrite since writing to the data that we are going to
@@ -106,9 +121,10 @@ vk::ImageMemoryBarrier ImageBase::genTransferDstBarrier(
 	);
 }
 
-vk::ImageMemoryBarrier ImageBase::genShaderRWBarrier(vk::CommandBuffer cb, vk::ImageLayout srcLayt) {
+vk::ImageMemoryBarrier ImageBase::genShaderRWBarrier(
+	vk::ImageLayout srcLayt
+) {
 	return genLayoutTransitionBarrier(
-		cb,
 		srcLayt,
 		vk::ImageLayout::eGeneral,
 		vk::AccessFlagBits::eTransferRead | vk::AccessFlagBits::eTransferWrite,

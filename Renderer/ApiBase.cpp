@@ -437,14 +437,6 @@ uint32_t ApiBase::findMemoryTypeIndex(uint32_t typeBits, vk::MemoryPropertyFlags
 	throw std::runtime_error(gen_err_str(__FILE__, __LINE__, "failed to find suitable memory type"));
 }
 
-//TODO need some sort of callback passed here
-//so that Renderer Registry can be
-//signaled to free all the resources it stores
-//since in vulkan vk::Device is needed
-//quite often to free resources
-//and we don't want to ship a reference to
-//it with every single object we create
-//since it's basicly a waste of memory
 ApiBase::~ApiBase() {
 	dvc.get().waitIdle();
 	inst.get().destroySurfaceKHR(srf);

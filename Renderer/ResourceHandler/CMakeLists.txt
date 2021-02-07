@@ -7,6 +7,8 @@ set(SRCS
 	StructuredBuffer.cpp
 	ImageBase.h
 	ImageBase.cpp
+	RenderTarget.h
+	RenderTarget.cpp
 )
 
 add_library(ResourceHandler ${SRCS})
