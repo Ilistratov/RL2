@@ -2,6 +2,8 @@
 #include <chrono>
 #include <thread>
 #include "Renderer\Core.h"
+#include "Renderer\PipelineHandler\DSetlLayoutFactory.h"
+#include "Renderer\ResourceHandler\StructuredBuffer.h"
 //#pragma warning(push, 0)
 //#include <vulkan\vulkan.hpp>
 //#pragma warning(pop)
@@ -54,5 +56,7 @@
 
 int main(int argc, char* argv[]) {
 	Renderer::core.init();
+	Renderer::Pipeline::DSetLayoutFactory lf;
+	Renderer::ResourceHandler::StructuredBuffer sb;
 	return 0;
 }

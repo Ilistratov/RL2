@@ -36,7 +36,22 @@ void StructuredBuffer::recordCopyFrom(
 		cpyReg[i] = copyRegions[i](stride);
 	}
 
-	cb.copyBuffer(src.buff, getBufferData().buff, cpyReg);
+	cb.copyBuffer(src.buff, getData().buff, cpyReg);
+}
+
+Pipeline::BindingInfo StructuredBuffer::genBindingInfo() {
+	Pipeline::BindingInfo res;
+	
+	res.type = vk::DescriptorType::eStorageBuffer;
+	res.bufferInfo = {
+		vk::DescriptorBufferInfo {
+			getData().buff,
+			0,
+			getData().sz
+		}
+	};
+	
+	return res;
 }
 
 }

@@ -14,7 +14,7 @@ DPoolHandler::DPoolHandler(std::vector<DSetLayoutFactory>& factory, uint64_t dPo
 	data.layts.reserve(factory.size());
 
 	for (uint64_t d_set_ind = 0; d_set_ind < factory.size(); d_set_ind++) {
-		auto bindings = factory[d_set_ind].genLayoutBindings();
+		auto bindings(std::move(factory[d_set_ind].genLayoutBindings()));
 		
 		data.layts[d_set_ind] = core.device().createDescriptorSetLayout(
 			vk::DescriptorSetLayoutCreateInfo{
@@ -23,13 +23,13 @@ DPoolHandler::DPoolHandler(std::vector<DSetLayoutFactory>& factory, uint64_t dPo
 			}
 		);
 
-		auto d_set_type_counts = factory[d_set_ind].genPoolSizes();
+		auto d_set_type_counts(std::move(factory[d_set_ind].genPoolSizes()));
 
 		if (d_set_type_counts.size() > type_counts.size()) {
 			type_counts.swap(d_set_type_counts);
 		}
 
-		for (auto [type, cnt] : d_set_type_counts) {
+		for (auto& [type, cnt] : d_set_type_counts) {
 			type_counts[type] += cnt;
 		}
 	}
@@ -37,14 +37,14 @@ DPoolHandler::DPoolHandler(std::vector<DSetLayoutFactory>& factory, uint64_t dPo
 	std::vector<vk::DescriptorPoolSize> pool_sizes;
 	pool_sizes.reserve(type_counts.size());
 
-	for (auto [type, cnt] : type_counts) {
-		pool_sizes.push_back({ type, cnt });
+	for (const auto& [type, cnt] : type_counts) {
+		pool_sizes.push_back({ type, (uint32_t)cnt });
 	}
 
 	core.device().createDescriptorPool(
 		vk::DescriptorPoolCreateInfo{
 			vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet,
-			factory.size(),
+			(uint32_t)factory.size(),
 			pool_sizes
 		}
 	);
@@ -59,7 +59,7 @@ DPoolHandler::DPoolHandler(std::vector<DSetLayoutFactory>& factory, uint64_t dPo
 	std::vector<vk::WriteDescriptorSet> writes;
 
 	for (uint64_t d_set_ind = 0; d_set_ind < factory.size(); d_set_ind++) {
-		auto d_set_writes = factory[d_set_ind].genDescriptorWrites(data.sets[d_set_ind]);
+		auto d_set_writes(std::move(factory[d_set_ind].genDescriptorWrites(data.sets[d_set_ind])));
 		writes.insert(writes.begin(), d_set_writes.begin(), d_set_writes.end());
 	}
 

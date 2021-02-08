@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "BufferBase.h"
+#include "Renderer\PipelineHandler\BindingInfo.h"
 
 namespace Renderer::ResourceHandler {
 
@@ -28,6 +29,8 @@ public:
 		const DataComponent::BufferData& src,
 		const std::vector<StructuredBufferCopy>& copyRegions = {}
 	);
+
+	Pipeline::BindingInfo genBindingInfo();
 };
 
 }

@@ -18,6 +18,8 @@ vk::WriteDescriptorSet BindingInfo::getWrite() const {
 	res.dstArrayElement = 0;
 	res.pBufferInfo = bufferInfo.data();
 	res.pImageInfo = imageInfo.data();
+
+	return res;
 }
 
 vk::DescriptorSetLayoutBinding BindingInfo::getLayoutBinding() const {
@@ -30,7 +32,7 @@ vk::DescriptorSetLayoutBinding BindingInfo::getLayoutBinding() const {
 	return res;
 }
 
-DSetLayoutFactory::DSetLayoutFactory(uint64_t reservedSize = 0) {
+DSetLayoutFactory::DSetLayoutFactory(uint64_t reservedSize) {
 	bindings.reserve(reservedSize);
 }
 

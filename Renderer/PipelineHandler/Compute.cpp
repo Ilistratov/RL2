@@ -20,9 +20,9 @@ Compute::Compute(
 	data.layt = core.device().createPipelineLayout(
 		vk::PipelineLayoutCreateInfo{
 			vk::PipelineLayoutCreateFlags{},
-			dPool.getData().layts.size(),
+			(uint32_t)dPool.getData().layts.size(),
 			dPool.getData().layts.data(),
-			pushConstants.size(),
+			(uint32_t)pushConstants.size(),
 			pushConstants.data()
 		}
 	);
