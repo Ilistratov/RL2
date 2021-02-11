@@ -2,6 +2,7 @@ cmake_minimum_required (VERSION 3.8)
 
 add_subdirectory(ResourceHandler)
 add_subdirectory(PipelineHandler)
+add_subdirectory(ShaderHandler)
 
 set(SRCS 
 	DataComponent/BufferData.h
@@ -21,9 +22,11 @@ set_property(TARGET Renderer PROPERTY CXX_STANDARD 17)
 
 add_dependencies(Renderer ResourceHandler)
 add_dependencies(Renderer PipelineHandler)
+add_dependencies(Renderer ShaderHandler)
 
 target_link_libraries(Renderer ResourceHandler)
 target_link_libraries(Renderer PipelineHandler)
+target_link_libraries(Renderer ShaderHandler)
 
 target_include_directories(Renderer PRIVATE ${CMAKE_SOURCE_DIR})
 target_include_directories(Renderer PUBLIC ${PROJECT_SOURCE_DIR}/Third-party/include PUBLIC $ENV{VULKAN_SDK}/Include)

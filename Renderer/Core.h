@@ -11,8 +11,11 @@
 namespace Renderer {
 
 //TODO
-//finish swapchain
-
+//Probably should switch from storing ALL the data components
+//in the RendererCore, since for some of them
+//it makes more sense to store them
+//directly where they are used
+//like in with cmdPool in ShaderHandler::Compute
 class RendererCore {
 	ApiBase base;
 	SwapchainHndl swpch;
@@ -40,6 +43,7 @@ public:
 	std::vector<DataComponent::BufferData>& getBuffers();
 	std::vector<DataComponent::ImageData>& getImages();
 	std::vector<DataComponent::DescriptorPoolData>& getDescriptorPools();
+	std::vector<DataComponent::CommandPoolData>& getCommandPools();
 	std::vector<DataComponent::PipelineData>& getPipelines();
 
 	template<typename T>

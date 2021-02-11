@@ -56,7 +56,7 @@
 
 int main(int argc, char* argv[]) {
 	Renderer::core.init();
-	Renderer::Pipeline::DSetLayoutFactory lf;
-	Renderer::ResourceHandler::StructuredBuffer sb;
+	//Renderer::Pipeline::DSetLayoutFactory lf;
+	//Renderer::ResourceHandler::StructuredBuffer sb;
 	return 0;
 }
