@@ -5,20 +5,37 @@
 namespace Renderer::ResourceHandler {
 
 class BufferBase {
-	uint64_t bufferDataId = UINT64_MAX;
-
 public:
+	struct Data {
+		vk::DeviceMemory mem = vk::DeviceMemory{};
+		vk::Buffer buff = vk::Buffer{};
+
+		vk::DeviceSize sz = 0;
+	};
+
+	BufferBase(const BufferBase&) = delete;
+	BufferBase& operator =(const BufferBase&) = delete;
+
 	BufferBase() = default;
 
 	BufferBase(
 		vk::DeviceSize sz,
 		vk::BufferUsageFlags usage,
-		vk::MemoryPropertyFlags memoryProperties,
-		uint64_t reservedBufferDataId = UINT64_MAX
+		vk::MemoryPropertyFlags memoryProperties
 	);
 
-	DataComponent::BufferData& getData();
-	const DataComponent::BufferData& getData() const;
+	BufferBase(BufferBase&& other);
+	void operator =(BufferBase&& other);
+
+	void swap(BufferBase& other);
+
+	Data& getData();
+	const Data& getData() const;
+
+	void free();
+
+protected:
+	Data data;
 };
 
 }

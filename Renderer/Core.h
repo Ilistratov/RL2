@@ -20,13 +20,13 @@ class RendererCore {
 	ApiBase base;
 	SwapchainHndl swpch;
 
-	std::vector<DataComponent::BufferData> bffs;
-	std::vector<DataComponent::ImageData> imgs;
-
-	std::vector<DataComponent::CommandPoolData> cmdPools;
-	std::vector<DataComponent::DescriptorPoolData> dPools;
-
-	std::vector<DataComponent::PipelineData> pplns;
+	//std::vector<DataComponent::BufferData> bffs;
+	//std::vector<DataComponent::ImageData> imgs;
+	//
+	//std::vector<DataComponent::CommandPoolData> cmdPools;
+	//std::vector<DataComponent::DescriptorPoolData> dPools;
+	//
+	//std::vector<DataComponent::PipelineData> pplns;
 
 public:
 	RendererCore(RendererCore const&) = delete;
@@ -40,11 +40,11 @@ public:
 
 	SwapchainHndl& swapchain();
 
-	std::vector<DataComponent::BufferData>& getBuffers();
-	std::vector<DataComponent::ImageData>& getImages();
-	std::vector<DataComponent::DescriptorPoolData>& getDescriptorPools();
-	std::vector<DataComponent::CommandPoolData>& getCommandPools();
-	std::vector<DataComponent::PipelineData>& getPipelines();
+	//std::vector<DataComponent::BufferData>& getBuffers();
+	//std::vector<DataComponent::ImageData>& getImages();
+	//std::vector<DataComponent::DescriptorPoolData>& getDescriptorPools();
+	//std::vector<DataComponent::CommandPoolData>& getCommandPools();
+	//std::vector<DataComponent::PipelineData>& getPipelines();
 
 	template<typename T>
 	inline void destroyDataComponent(T& component) {

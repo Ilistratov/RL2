@@ -5,18 +5,9 @@ namespace Renderer::ResourceHandler {
 BufferBase::BufferBase(
 	vk::DeviceSize sz,
 	vk::BufferUsageFlags usage,
-	vk::MemoryPropertyFlags memoryProperties,
-	uint64_t reservedBufferDataId) {
-	if (reservedBufferDataId == UINT64_MAX) {
-		reservedBufferDataId = core.getBuffers().size();
-		core.getBuffers().push_back({});
-	}
-	
-	bufferDataId = reservedBufferDataId;
+	vk::MemoryPropertyFlags memoryProperties) {
 	auto device = core.device();
-
-	auto& data = getData();
-
+	
 	data.buff = device.createBuffer(
 		vk::BufferCreateInfo{
 			vk::BufferCreateFlags{},
@@ -41,12 +32,34 @@ BufferBase::BufferBase(
 	device.bindBufferMemory(data.buff, data.mem, 0);
 }
 
-DataComponent::BufferData& BufferBase::getData() {
-	return core.getBuffers()[bufferDataId];
+BufferBase::BufferBase(BufferBase&& other) {
+	swap(other);
 }
 
-const DataComponent::BufferData& BufferBase::getData() const {
-	return core.getBuffers()[bufferDataId];
+void BufferBase::operator=(BufferBase&& other) {
+	swap(other);
+	other.free();
+}
+
+void BufferBase::swap(BufferBase& other) {
+	std::swap(data, other.data);
+}
+
+BufferBase::Data& BufferBase::getData() {
+	return data;
+}
+
+const BufferBase::Data& BufferBase::getData() const {
+	return data;
+}
+
+void BufferBase::free() {
+	core.device().destroyBuffer(data.buff);
+	core.device().freeMemory(data.mem);
+	
+	data.sz = 0;
+	data.buff = vk::Buffer{};
+	data.mem = vk::DeviceMemory{};
 }
 
 }

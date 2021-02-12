@@ -5,9 +5,6 @@ add_subdirectory(PipelineHandler)
 add_subdirectory(ShaderHandler)
 
 set(SRCS 
-	DataComponent/BufferData.h
-	DataComponent/ImageData.h
-	DataComponent/CommandPoolData.h
 	ApiBase.h
 	ApiBase.cpp
 	Core.h

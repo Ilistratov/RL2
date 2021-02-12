@@ -20,13 +20,12 @@ public:
 	StructuredBuffer(
 		uint64_t count,
 		uint64_t stride = 1,
-		vk::BufferUsageFlagBits specificUsage = {},
-		uint64_t reservedBufferDataId = UINT64_MAX
+		vk::BufferUsageFlagBits specificUsage = {}
 	);
 
 	void recordCopyFrom(
 		vk::CommandBuffer cb,
-		const DataComponent::BufferData& src,
+		const BufferBase& src,
 		const std::vector<StructuredBufferCopy>& copyRegions = {}
 	);
 

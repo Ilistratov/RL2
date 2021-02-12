@@ -9,21 +9,21 @@ vk::BufferCopy StructuredBufferCopy::operator()(uint64_t stride) const {
 StructuredBuffer::StructuredBuffer(
 	uint64_t count,
 	uint64_t stride,
-	vk::BufferUsageFlagBits specificUsage,
-	uint64_t reservedBufferDataId) : count(count), stride(stride) {
+	vk::BufferUsageFlagBits specificUsage
+) : count(count),
+	stride(stride) {
 	BufferBase::BufferBase(
 		stride * count,
 		vk::BufferUsageFlagBits::eStorageBuffer |
 		vk::BufferUsageFlagBits::eTransferDst |
 		specificUsage,
-		vk::MemoryPropertyFlagBits::eDeviceLocal,
-		reservedBufferDataId
+		vk::MemoryPropertyFlagBits::eDeviceLocal
 	);
 }
 
 void StructuredBuffer::recordCopyFrom(
 	vk::CommandBuffer cb,
-	const DataComponent::BufferData& src,
+	const BufferBase& src,
 	const std::vector<StructuredBufferCopy>& copyRegions
 ) {
 	if (copyRegions.empty()) {
@@ -36,7 +36,7 @@ void StructuredBuffer::recordCopyFrom(
 		cpyReg[i] = copyRegions[i](stride);
 	}
 
-	cb.copyBuffer(src.buff, getData().buff, cpyReg);
+	cb.copyBuffer(src.getData().buff, data.buff, cpyReg);
 }
 
 Pipeline::BindingInfo StructuredBuffer::genBindingInfo() {
