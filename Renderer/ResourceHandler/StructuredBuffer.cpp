@@ -21,6 +21,21 @@ StructuredBuffer::StructuredBuffer(
 	);
 }
 
+StructuredBuffer::StructuredBuffer(StructuredBuffer&& other) {
+	swap(other);
+}
+
+void StructuredBuffer::operator=(StructuredBuffer&& other) {
+	swap(other);
+	other.free();
+}
+
+void StructuredBuffer::free() {
+	BufferBase::free();
+	stride = 1;
+	count = 0;
+}
+
 void StructuredBuffer::recordCopyFrom(
 	vk::CommandBuffer cb,
 	const BufferBase& src,
@@ -37,6 +52,12 @@ void StructuredBuffer::recordCopyFrom(
 	}
 
 	cb.copyBuffer(src.getData().buff, data.buff, cpyReg);
+}
+
+void StructuredBuffer::swap(StructuredBuffer& other) {
+	BufferBase::swap(other);
+	std::swap(count, other.count);
+	std::swap(stride, other.stride);
 }
 
 Pipeline::BindingInfo StructuredBuffer::genBindingInfo() {

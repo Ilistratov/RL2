@@ -17,7 +17,6 @@ public:
 	BufferBase& operator =(const BufferBase&) = delete;
 
 	BufferBase() = default;
-
 	BufferBase(
 		vk::DeviceSize sz,
 		vk::BufferUsageFlags usage,
@@ -34,6 +33,7 @@ public:
 
 	void free();
 
+	~BufferBase();
 protected:
 	Data data;
 };

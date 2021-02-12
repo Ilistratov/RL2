@@ -7,16 +7,8 @@ ImageBase::ImageBase(
 	vk::Format fmt,
 	vk::ImageUsageFlags usage,
 	vk::MemoryPropertyFlags memoryProperties,
-	uint64_t reservedImageDataId,
 	vk::ImageLayout initialLayout
 ) {
-	if (reservedImageDataId == UINT64_MAX) {
-		reservedImageDataId = core.getImages().size();
-		core.getImages().push_back({});
-	}
-
-	DataComponent::ImageData& data = core.getImages()[reservedImageDataId];
-
 	data.ext = ext;
 	data.fmt = fmt;
 	
@@ -52,8 +44,37 @@ ImageBase::ImageBase(
 	core.device().bindImageMemory(data.img, data.mem, 0);
 }
 
-DataComponent::ImageData& ImageBase::getData() {
-	return core.getImages()[imageDataId];
+ImageBase::ImageBase(ImageBase&& other) {
+	swap(other);
+}
+
+void ImageBase::operator=(ImageBase&& other) {
+	swap(other);
+	other.free();
+}
+
+void ImageBase::swap(ImageBase& other) {
+	std::swap(data, other.data);
+}
+
+void ImageBase::free() {
+	core.device().destroyImage(data.img);
+	core.device().freeMemory(data.mem);
+
+	data.sz = 0;
+	data.ext = vk::Extent2D{ 0, 0 };
+	data.fmt = vk::Format::eUndefined;
+
+	data.mem = vk::DeviceMemory{};
+	data.img = vk::Image{};
+}
+
+ImageBase::Data& ImageBase::getData() {
+	return data;
+}
+
+const ImageBase::Data& ImageBase::getData() const {
+	return data;
 }
 
 vk::ImageSubresourceLayers ImageBase::getSubresourceLayers() const {
@@ -75,6 +96,10 @@ vk::ImageSubresourceRange ImageBase::getSubresourceRange() const {
 	};
 }
 
+ImageBase::~ImageBase() {
+	free();
+}
+
 vk::ImageMemoryBarrier ImageBase::genLayoutTransitionBarrier(
 	vk::ImageLayout srcLayt,
 	vk::ImageLayout dstLayt,
@@ -88,7 +113,7 @@ vk::ImageMemoryBarrier ImageBase::genLayoutTransitionBarrier(
 		dstLayt,
 		{VK_QUEUE_FAMILY_IGNORED},
 		{VK_QUEUE_FAMILY_IGNORED},
-		getData().img,
+		data.img,
 		vk::ImageSubresourceRange{
 			vk::ImageAspectFlagBits::eColor,
 			0,

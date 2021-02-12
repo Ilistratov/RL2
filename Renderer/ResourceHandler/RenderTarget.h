@@ -9,14 +9,14 @@ public:
 	RenderTarget(
 		vk::Extent2D ext,
 		vk::Format fmt,
-		uint64_t reservedImageDataId = UINT64_MAX
+		vk::ImageLayout initialLayout = vk::ImageLayout::eGeneral
 	);
 
 	vk::ImageMemoryBarrier genPreRenderBarrier();
 	vk::ImageMemoryBarrier genPreBlitBarrier();
 	
 	vk::ImageBlit genBlit();
-	void recordBlit(vk::CommandBuffer cb, DataComponent::ImageData& dst);
+	void recordBlit(vk::CommandBuffer cb, ImageBase& dst);
 };
 
 }

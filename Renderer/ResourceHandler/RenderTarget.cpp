@@ -5,15 +5,14 @@ namespace Renderer::ResourceHandler {
 RenderTarget::RenderTarget(
 	vk::Extent2D ext,
 	vk::Format fmt,
-	uint64_t reservedImageDataId
+	vk::ImageLayout initialLayout
 ) : ImageBase(
 	ext,
 	fmt,
 	vk::ImageUsageFlagBits::eStorage |
 	vk::ImageUsageFlagBits::eTransferSrc,
 	vk::MemoryPropertyFlagBits::eDeviceLocal,
-	reservedImageDataId,
-	vk::ImageLayout::eGeneral
+	initialLayout
 ) {}
 
 vk::ImageMemoryBarrier RenderTarget::genPreRenderBarrier() {
@@ -33,11 +32,11 @@ vk::ImageBlit RenderTarget::genBlit() {
 	};
 }
 
-void RenderTarget::recordBlit(vk::CommandBuffer cb, DataComponent::ImageData& dst) {
+void RenderTarget::recordBlit(vk::CommandBuffer cb, ImageBase& dst) {
 	cb.blitImage(
 		getData().img,
 		vk::ImageLayout::eTransferSrcOptimal,
-		dst.img,
+		dst.getData().img,
 		vk::ImageLayout::eTransferDstOptimal,
 		genBlit(),
 		vk::Filter::eLinear

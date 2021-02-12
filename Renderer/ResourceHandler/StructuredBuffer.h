@@ -13,8 +13,11 @@ struct StructuredBufferCopy {
 };
 
 class StructuredBuffer : public BufferBase {
-	uint64_t stride = 1, count = 0;
+	uint64_t count = 0, stride = 1;
 public:
+	StructuredBuffer(const StructuredBuffer&) = delete;
+	StructuredBuffer& operator =(const StructuredBuffer&) = delete;
+
 	StructuredBuffer() = default;
 
 	StructuredBuffer(
@@ -23,11 +26,17 @@ public:
 		vk::BufferUsageFlagBits specificUsage = {}
 	);
 
+	StructuredBuffer(StructuredBuffer&& other);
+	void operator =(StructuredBuffer&& other);
+
 	void recordCopyFrom(
 		vk::CommandBuffer cb,
 		const BufferBase& src,
 		const std::vector<StructuredBufferCopy>& copyRegions = {}
 	);
+
+	void swap(StructuredBuffer& other);
+	void free();
 
 	Pipeline::BindingInfo genBindingInfo();
 };

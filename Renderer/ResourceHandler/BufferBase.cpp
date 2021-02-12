@@ -62,4 +62,8 @@ void BufferBase::free() {
 	data.mem = vk::DeviceMemory{};
 }
 
+BufferBase::~BufferBase() {
+	free();
+}
+
 }
