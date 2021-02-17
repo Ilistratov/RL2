@@ -5,9 +5,8 @@ set(SRCS
 	Compute.cpp
 	DPoolHandler.h
 	DPoolHandler.cpp
-	BindingInfo.h
-	DSetlLayoutFactory.h
-	DSetLayoutFactory.cpp
+	DescriptorBinding.h
+	DescriptorBinding.cpp
 	LoadShaderModule.h
 	LoadShaderModule.cpp
 )

@@ -4,14 +4,30 @@
 namespace Renderer::ResourceHandler {
 
 class CommandPool {
-	uint64_t commandPoolDataId = UINT64_MAX;
 public:
+	struct Data {
+		vk::CommandPool pool;
+		std::vector<vk::CommandBuffer> cmd;
+	};
+
+	CommandPool(const CommandPool&) = delete;
+	CommandPool& operator =(const CommandPool&) = delete;
+
 	CommandPool() = default;
-	CommandPool(uint64_t queueInd, uint64_t reservedCommandPoolDataId = UINT64_MAX);
+	CommandPool(uint64_t queueInd);
+
+	CommandPool(CommandPool&& other);
+	void operator =(CommandPool&& other);
+
+	void swap(CommandPool& other);
+	void free();
 
 	void reserve(uint64_t count);
 
-	DataComponent::CommandPoolData& getData();
+	Data& getData();
+
+private:
+	Data data;
 };
 
 }

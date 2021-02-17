@@ -43,12 +43,6 @@ public:
 	bool acquireNextImage();
 	bool present(std::vector<vk::Semaphore> wait);
 
-	//since this image is not actually owned by application,
-	//the mem field of ImageData will be VK_NULL_HANDLE
-	//the sz field is also 0 since it's rather an information about memory,
-	//not the image
-	DataComponent::ImageData imageData(uint32_t ind = UINT32_MAX) const;
-
 	~SwapchainHndl();
 };
 

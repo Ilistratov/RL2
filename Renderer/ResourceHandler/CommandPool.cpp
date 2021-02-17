@@ -2,16 +2,7 @@
 
 namespace Renderer::ResourceHandler {
 
-CommandPool::CommandPool(uint64_t queueInd, uint64_t reservedCommandPoolDataId) {
-	if (reservedCommandPoolDataId == UINT64_MAX) {
-		reservedCommandPoolDataId = core.getCommandPools().size();
-		core.getCommandPools().push_back({});
-	}
-
-	commandPoolDataId = reservedCommandPoolDataId;
-
-	auto& data = getData();
-
+CommandPool::CommandPool(uint64_t queueInd) {
 	data.pool = core.device().createCommandPool(
 		vk::CommandPoolCreateInfo{
 			vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
@@ -20,8 +11,30 @@ CommandPool::CommandPool(uint64_t queueInd, uint64_t reservedCommandPoolDataId) 
 	);
 }
 
+void CommandPool::swap(CommandPool& other) {
+	std::swap(data, other.data);
+}
+
+CommandPool::CommandPool(CommandPool&& other) {
+	swap(other);
+}
+
+void CommandPool::operator =(CommandPool&& other) {
+	swap(other);
+	other.free();
+}
+
+void CommandPool::free() {
+	core.device().freeCommandBuffers(data.pool, data.cmd);
+	core.device().destroyCommandPool(data.pool);
+
+	data.cmd.clear();
+	data.cmd.shrink_to_fit();
+
+	data.pool = vk::CommandPool{};
+}
+
 void CommandPool::reserve(uint64_t count) {
-	auto& data = getData();
 	if (count <= data.cmd.size()) {
 		return;
 	}
@@ -38,8 +51,8 @@ void CommandPool::reserve(uint64_t count) {
 	data.cmd.insert(data.cmd.end(), n_cmd.begin(), n_cmd.end());
 }
 
-DataComponent::CommandPoolData& CommandPool::getData() {
-	return core.getCommandPools()[commandPoolDataId];
+CommandPool::Data& CommandPool::getData() {
+	return data;
 }
 
 }

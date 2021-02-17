@@ -1,39 +1,41 @@
+#include <algorithm>
+#include <cassert>
 #include "DPoolHandler.h"
 
 namespace Renderer::Pipeline {
 
-DPoolHandler::DPoolHandler(std::vector<DSetLayoutFactory>& factory, uint64_t dPoolDataReservedId) {
-	if (dPoolDataReservedId == UINT64_MAX) {
-		dPoolDataReservedId = core.getDescriptorPools().size();
-		core.getDescriptorPools().push_back({});
+DPoolHandler::DPoolHandler(
+	const std::vector<IDescriptorBindable*>& setBindables
+) {
+	std::vector<std::vector<DescriptorBinding>> setBindings;
+	setBindings.reserve(setBindables.size());
+
+	for (const auto& bindable : setBindables) {
+		setBindings.push_back(bindable->getBindings());
 	}
 
-	auto& data = getData();
+	data.layts.reserve(setBindings.size());
 	std::unordered_map<vk::DescriptorType, uint64_t> type_counts;
 
-	data.layts.reserve(factory.size());
+	for (const auto& setBnd : setBindings) {
+		std::vector<vk::DescriptorSetLayoutBinding> bndInfo;
+		bndInfo.reserve(setBnd.size());
 
-	for (uint64_t d_set_ind = 0; d_set_ind < factory.size(); d_set_ind++) {
-		auto bindings(std::move(factory[d_set_ind].genLayoutBindings()));
-		
-		data.layts[d_set_ind] = core.device().createDescriptorSetLayout(
-			vk::DescriptorSetLayoutCreateInfo{
-				vk::DescriptorSetLayoutCreateFlags{},
-				bindings
-			}
+		for (const auto& bnd : setBnd) {
+			bndInfo.push_back(bnd.getLayoutBinding());
+			type_counts[bndInfo.back().descriptorType] += bnd.getCount();
+		}
+
+		data.layts.push_back(
+			core.device().createDescriptorSetLayout(
+				vk::DescriptorSetLayoutCreateInfo{
+					vk::DescriptorSetLayoutCreateFlags{},
+					bndInfo
+				}
+			)
 		);
-
-		auto d_set_type_counts(std::move(factory[d_set_ind].genPoolSizes()));
-
-		if (d_set_type_counts.size() > type_counts.size()) {
-			type_counts.swap(d_set_type_counts);
-		}
-
-		for (auto& [type, cnt] : d_set_type_counts) {
-			type_counts[type] += cnt;
-		}
 	}
-	
+
 	std::vector<vk::DescriptorPoolSize> pool_sizes;
 	pool_sizes.reserve(type_counts.size());
 
@@ -41,10 +43,10 @@ DPoolHandler::DPoolHandler(std::vector<DSetLayoutFactory>& factory, uint64_t dPo
 		pool_sizes.push_back({ type, (uint32_t)cnt });
 	}
 
-	core.device().createDescriptorPool(
+	data.pool = core.device().createDescriptorPool(
 		vk::DescriptorPoolCreateInfo{
 			vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet,
-			(uint32_t)factory.size(),
+			(uint32_t)setBindings.size(),
 			pool_sizes
 		}
 	);
@@ -56,22 +58,58 @@ DPoolHandler::DPoolHandler(std::vector<DSetLayoutFactory>& factory, uint64_t dPo
 		}
 	);
 
-	std::vector<vk::WriteDescriptorSet> writes;
+	for (uint32_t setInd = 0; setInd < setBindings.size(); setInd++) {
+		std::vector<vk::WriteDescriptorSet> writes;
+		writes.reserve(setBindings[setInd].size());
+		
+		for (const auto& bnd : setBindings[setInd]) {
+			writes.push_back(bnd.getWrite());
+			writes.back().dstSet = data.sets[setInd];
+		}
 
-	for (uint64_t d_set_ind = 0; d_set_ind < factory.size(); d_set_ind++) {
-		auto d_set_writes(std::move(factory[d_set_ind].genDescriptorWrites(data.sets[d_set_ind])));
-		writes.insert(writes.begin(), d_set_writes.begin(), d_set_writes.end());
+		core.device().updateDescriptorSets(writes, {});
 	}
-
-	core.device().updateDescriptorSets(writes, {});
 }
 
-DataComponent::DescriptorPoolData& DPoolHandler::getData() {
-	return core.getDescriptorPools()[dPoolDataId];
+DPoolHandler::Data& DPoolHandler::getData() {
+	return data;
 }
 
-const DataComponent::DescriptorPoolData& DPoolHandler::getData() const {
-	return core.getDescriptorPools()[dPoolDataId];
+const DPoolHandler::Data& DPoolHandler::getData() const {
+	return data;
+}
+
+DPoolHandler::~DPoolHandler() {
+	free();
+}
+
+DPoolHandler::DPoolHandler(DPoolHandler&& other) {
+	swap(other);
+}
+
+void DPoolHandler::operator=(DPoolHandler& other) {
+	swap(other);
+	other.free();
+}
+
+void DPoolHandler::swap(DPoolHandler& other) {
+	std::swap(data, other.data);
+}
+
+void DPoolHandler::free() {
+	for (auto layt : data.layts) {
+		core.device().destroyDescriptorSetLayout(layt);
+	}
+	
+	core.device().destroyDescriptorPool(data.pool);
+
+	data.layts.clear();
+	data.layts.shrink_to_fit();
+	
+	data.sets.clear();
+	data.sets.shrink_to_fit();
+
+	data.pool = vk::DescriptorPool{};
 }
 
 }

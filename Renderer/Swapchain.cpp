@@ -100,16 +100,6 @@ vk::Semaphore SwapchainHndl::imageAvaliable() const noexcept {
 	return imgAvaliable;
 }
 
-DataComponent::ImageData SwapchainHndl::imageData(uint32_t ind) const {
-	if (ind == UINT32_MAX) {
-		ind = activeImageInd;
-	}
-
-	assert(("There is no active image", activeImageInd != UINT32_MAX));
-
-	return DataComponent::ImageData{ vk::DeviceMemory{}, imgs[activeImageInd], 0, ext, fmt };
-}
-
 bool SwapchainHndl::acquireNextImage() {
 	if (activeImageInd != UINT32_MAX) {
 		GlobalLog.warningMsg("acquireNextImage called before previously acquired image was presented, keeping old activeImageInd");
