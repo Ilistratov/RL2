@@ -5,7 +5,6 @@
 #include "ApiBase.h"
 #include "Swapchain.h"
 
-#include "DataComponent\DataComponents.h"
 #include "Utill\UtillFunctions.h"
 
 namespace Renderer {

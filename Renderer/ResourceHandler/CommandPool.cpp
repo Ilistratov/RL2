@@ -11,10 +11,6 @@ CommandPool::CommandPool(uint64_t queueInd) {
 	);
 }
 
-void CommandPool::swap(CommandPool& other) {
-	std::swap(data, other.data);
-}
-
 CommandPool::CommandPool(CommandPool&& other) {
 	swap(other);
 }
@@ -22,6 +18,10 @@ CommandPool::CommandPool(CommandPool&& other) {
 void CommandPool::operator =(CommandPool&& other) {
 	swap(other);
 	other.free();
+}
+
+void CommandPool::swap(CommandPool& other) {
+	std::swap(data, other.data);
 }
 
 void CommandPool::free() {
@@ -51,8 +51,22 @@ void CommandPool::reserve(uint64_t count) {
 	data.cmd.insert(data.cmd.end(), n_cmd.begin(), n_cmd.end());
 }
 
+vk::CommandBuffer CommandPool::reserveOneTimeSubmit() {
+	return core.device().allocateCommandBuffers(
+		vk::CommandBufferAllocateInfo{
+			data.pool,
+			vk::CommandBufferLevel::ePrimary, //TODO make it configurable
+			1
+		}
+	)[0];
+}
+
 CommandPool::Data& CommandPool::getData() {
 	return data;
+}
+
+CommandPool::~CommandPool() {
+	free();
 }
 
 }

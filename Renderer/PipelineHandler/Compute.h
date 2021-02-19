@@ -12,20 +12,25 @@
 namespace Renderer::Pipeline {
 
 class Compute {
-	uint64_t pipelineDataId = UINT64_MAX;
-	//TODO create pipeline using DescriptorHandler for layout creation
-
 public:
+	struct Data {
+		vk::Pipeline ppln;
+		vk::PipelineLayout layt;
+	};
+
 	Compute() = default;
 	Compute(
 		const DPoolHandler& dPool,
 		const std::vector<vk::PushConstantRange>& pushConstants,
 		const std::string& shaderFilePath,
-		const std::string& shaderMain,
-		uint64_t reservedPipelineDataId = UINT64_MAX
+		const std::string& shaderMain
 	);
 
-	DataComponent::PipelineData& getData();
+	Data& getData();
+	const Data& getData() const;
+
+private:
+	Data data;
 };
 
 }

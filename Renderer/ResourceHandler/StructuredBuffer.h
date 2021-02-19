@@ -3,7 +3,6 @@
 #include <vector>
 
 #include "BufferBase.h"
-#include "Renderer\PipelineHandler\BindingInfo.h"
 
 namespace Renderer::ResourceHandler {
 
@@ -37,8 +36,6 @@ public:
 
 	void swap(StructuredBuffer& other);
 	void free();
-
-	Pipeline::BindingInfo genBindingInfo();
 };
 
 }

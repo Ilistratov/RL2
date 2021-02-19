@@ -60,19 +60,4 @@ void StructuredBuffer::swap(StructuredBuffer& other) {
 	std::swap(stride, other.stride);
 }
 
-Pipeline::BindingInfo StructuredBuffer::genBindingInfo() {
-	Pipeline::BindingInfo res;
-	
-	res.type = vk::DescriptorType::eStorageBuffer;
-	res.bufferInfo = {
-		vk::DescriptorBufferInfo {
-			getData().buff,
-			0,
-			getData().sz
-		}
-	};
-	
-	return res;
-}
-
 }

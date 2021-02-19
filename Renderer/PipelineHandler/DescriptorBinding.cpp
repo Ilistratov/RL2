@@ -42,4 +42,6 @@ vk::DescriptorSetLayoutBinding DescriptorBinding::getLayoutBinding() const {
 	};
 }
 
+std::vector<DescriptorBinding> IDescriptorBindable::getBindings() const { return {}; }
+
 }

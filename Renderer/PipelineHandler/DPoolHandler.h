@@ -21,7 +21,7 @@ public:
 	DPoolHandler() = default;
 
 	DPoolHandler(DPoolHandler&& other);
-	void operator =(DPoolHandler& other);
+	void operator =(DPoolHandler&& other);
 
 	void swap(DPoolHandler& other);
 	void free();

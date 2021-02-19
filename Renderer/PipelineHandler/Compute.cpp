@@ -6,17 +6,8 @@ Compute::Compute(
 	const DPoolHandler& dPool,
 	const std::vector<vk::PushConstantRange>& pushConstants,
 	const std::string& shaderFilePath,
-	const std::string& shaderMain,
-	uint64_t reservedPipelineDataId
+	const std::string& shaderMain
 ) {
-	if (reservedPipelineDataId == UINT64_MAX) {
-		reservedPipelineDataId = core.getPipelines().size();
-		core.getPipelines().push_back({});
-	}
-
-	pipelineDataId = reservedPipelineDataId;
-	auto& data = core.getPipelines()[pipelineDataId];
-
 	data.layt = core.device().createPipelineLayout(
 		vk::PipelineLayoutCreateInfo{
 			vk::PipelineLayoutCreateFlags{},
@@ -56,8 +47,12 @@ Compute::Compute(
 	data.ppln = res.value;
 }
 
-DataComponent::PipelineData& Compute::getData() {
-	return core.getPipelines()[pipelineDataId];
+Compute::Data& Compute::getData() {
+	return data;
+}
+
+const Compute::Data& Compute::getData() const {
+	return data;
 }
 
 }

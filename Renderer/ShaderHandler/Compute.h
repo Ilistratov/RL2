@@ -1,7 +1,8 @@
 #pragma once
 
 #include "Renderer\PipelineHandler\Compute.h"
-#include "ComputeFactory.h"
+#include "Renderer\ResourceHandler\CommandPool.h"
+#include "IShaderBindable.h"
 
 namespace Renderer::ShaderHandler {
 
@@ -9,29 +10,21 @@ class Compute {
 	Pipeline::DPoolHandler dPool;
 	Pipeline::Compute pipeline;
 	ResourceHandler::CommandPool cmdPool;
+	IShaderBindable* bnd;
 
-	vk::Fence submitFinished;
-	vk::Semaphore dispatchFinished;
+	vk::Fence recordAndSubmitInitCB();
 
-	std::vector<IVarControllerCallback*> vcCallback;
 public:
+	Compute(const Compute& other) = delete;
+	Compute& operator =(const Compute& other) = delete;
+
 	Compute() = default;
+
 	Compute(
-		ComputeFactory&& factory,
-		const std::vector<vk::PushConstantRange>& pushConstants,
+		IShaderBindable* bnd,
 		const std::string& shaderFilePath,
-		const std::string& shaderMain,
-		uint32_t dispatchX,
-		uint32_t dispatchY,
-		uint32_t dispatchZ,
-		uint64_t reservedPipelineDataId = UINT64_MAX,
-		uint64_t reservedDPoolDataId = UINT64_MAX,
-		uint64_t reservedCmdPoolDataId = UINT64_MAX
+		const std::string& shaderMain
 	);
-
-	void submit();
-
-	~Compute();
 };
 
 }

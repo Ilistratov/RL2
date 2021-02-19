@@ -3,8 +3,8 @@ cmake_minimum_required (VERSION 3.8)
 set(SRCS 
 	Compute.h
 	Compute.cpp
-	ComputeFactory.h
-	ComputeFactory.cpp
+	IShaderBindable.h
+	IShaderBindable.cpp
 )
 
 add_library(ShaderHandler ${SRCS})

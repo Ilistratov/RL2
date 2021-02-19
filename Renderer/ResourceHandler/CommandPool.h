@@ -23,9 +23,11 @@ public:
 	void free();
 
 	void reserve(uint64_t count);
+	vk::CommandBuffer reserveOneTimeSubmit();
 
 	Data& getData();
 
+	~CommandPool();
 private:
 	Data data;
 };

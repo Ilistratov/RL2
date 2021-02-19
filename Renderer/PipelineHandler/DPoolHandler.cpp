@@ -87,7 +87,7 @@ DPoolHandler::DPoolHandler(DPoolHandler&& other) {
 	swap(other);
 }
 
-void DPoolHandler::operator=(DPoolHandler& other) {
+void DPoolHandler::operator=(DPoolHandler&& other) {
 	swap(other);
 	other.free();
 }
