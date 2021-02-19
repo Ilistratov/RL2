@@ -18,6 +18,9 @@ public:
 		vk::PipelineLayout layt;
 	};
 
+	Compute(Compute&) = delete;
+	Compute& operator =(Compute&) = delete;
+
 	Compute() = default;
 	Compute(
 		const DPoolHandler& dPool,
@@ -26,8 +29,16 @@ public:
 		const std::string& shaderMain
 	);
 
+	Compute(Compute&& other);
+	void operator =(Compute&& other);
+
+	void swap(Compute& other);
+	void free();
+
 	Data& getData();
 	const Data& getData() const;
+
+	~Compute();
 
 private:
 	Data data;

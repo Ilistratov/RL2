@@ -33,6 +33,10 @@ BufferBase::BufferBase(
 }
 
 BufferBase::BufferBase(BufferBase&& other) {
+	if (this == &other) {
+		return;
+	}
+
 	swap(other);
 }
 

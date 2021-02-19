@@ -9,10 +9,26 @@ namespace Renderer::ShaderHandler {
 class Compute {
 	Pipeline::DPoolHandler dPool;
 	Pipeline::Compute pipeline;
+	
 	ResourceHandler::CommandPool cmdPool;
-	IShaderBindable* bnd;
+	IShaderBindable* bnd = nullptr;
 
-	vk::Fence recordAndSubmitInitCB();
+	std::tuple<int, int, int> dispatchDim = { 0, 0, 0 };
+
+	vk::Fence submissionFinished;
+	vk::Semaphore loadDataFinished;
+	vk::Semaphore dispatchFinished;
+
+	vk::CommandBuffer recordInit();
+	vk::CommandBuffer recordLoadDataDynamic();
+	vk::CommandBuffer recordTransferResultDynamic();
+
+	void waitSubmissionFin();
+	void resetSubmissionFin();
+
+	void recordLoadData();
+	void recordDispatch();
+	void recordTransferResult();
 
 public:
 	Compute(const Compute& other) = delete;
@@ -23,8 +39,19 @@ public:
 	Compute(
 		IShaderBindable* bnd,
 		const std::string& shaderFilePath,
-		const std::string& shaderMain
+		const std::string& shaderMain,
+		std::tuple<int, int, int> dispatchDim
 	);
+
+	Compute(Compute&& other);
+	void operator =(Compute&& other);
+
+	void swap(Compute& other);
+	void free();
+
+	void dispatch();
+
+	~Compute();
 };
 
 }

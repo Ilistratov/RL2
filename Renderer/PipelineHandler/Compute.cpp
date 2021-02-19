@@ -47,12 +47,41 @@ Compute::Compute(
 	data.ppln = res.value;
 }
 
+Compute::Compute(Compute&& other) {
+	swap(other);
+}
+
+void Compute::operator=(Compute&& other) {
+	if (this == &other) {
+		return;
+	}
+
+	swap(other);
+	other.free();
+}
+
+void Compute::swap(Compute& other) {
+	std::swap(data, other.data);
+}
+
+void Compute::free() {
+	core.device().destroyPipeline(data.ppln);
+	core.device().destroyPipelineLayout(data.layt);
+
+	data.ppln = vk::Pipeline{};
+	data.layt = vk::PipelineLayout{};
+}
+
 Compute::Data& Compute::getData() {
 	return data;
 }
 
 const Compute::Data& Compute::getData() const {
 	return data;
+}
+
+Compute::~Compute() {
+	free();
 }
 
 }

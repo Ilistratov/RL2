@@ -2,19 +2,34 @@
 
 namespace Renderer::ShaderHandler {
 
-IShaderBindable::Barriers IShaderBindable::collectPreLoadDataBarriers(BarrierStages stage) { return {}; }
-IShaderBindable::Barriers IShaderBindable::collectPreDispatchBarriers(BarrierStages stage) { return {}; }
-IShaderBindable::Barriers IShaderBindable::collectPreTransferResultBarriers(BarrierStages stage) { return {}; }
+IShaderBindable::Barriers IShaderBindable::collectPreLoadDataBarriers() { return {}; }
+IShaderBindable::Barriers IShaderBindable::collectPreDispatchBarriers() { return {}; }
+IShaderBindable::Barriers IShaderBindable::collectPreTransferResultBarriers() { return {}; }
 
-void IShaderBindable::recordInit(vk::CommandBuffer cb) {}
+void IShaderBindable::recordInit(vk::CommandBuffer) {}
 
-void IShaderBindable::recordLoadData(vk::CommandBuffer cb) {}
-void IShaderBindable::recordLoadDataDynamic(vk::CommandBuffer cb) {}
+void IShaderBindable::recordLoadData(vk::CommandBuffer) {}
+void IShaderBindable::recordLoadDataDynamic(vk::CommandBuffer) {}
 
-void IShaderBindable::recordTransferResult(vk::CommandBuffer cb) {}
-void IShaderBindable::recordTransferResultDynamic(vk::CommandBuffer cb) {}
+void IShaderBindable::recordTransferResult(vk::CommandBuffer) {}
+void IShaderBindable::recordTransferResultDynamic(vk::CommandBuffer) {}
 
 std::vector<Pipeline::IDescriptorBindable*> IShaderBindable::collectSetBindables() { return {}; }
 std::vector<vk::PushConstantRange> IShaderBindable::collectPushConstants() { return {}; }
+
+void IShaderBindable::Barriers::record(
+	vk::CommandBuffer& cmd,
+	vk::PipelineStageFlags srcStage,
+	vk::PipelineStageFlags dstStage
+) {
+	cmd.pipelineBarrier(
+		vk::PipelineStageFlagBits::eTransfer,
+		vk::PipelineStageFlagBits::eComputeShader,
+		{},
+		{},
+		buff,
+		img
+	);
+}
 
 }

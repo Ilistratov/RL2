@@ -14,7 +14,7 @@ public:
 	CommandPool& operator =(const CommandPool&) = delete;
 
 	CommandPool() = default;
-	CommandPool(uint64_t queueInd);
+	CommandPool(uint32_t queueInd);
 
 	CommandPool(CommandPool&& other);
 	void operator =(CommandPool&& other);
@@ -22,8 +22,9 @@ public:
 	void swap(CommandPool& other);
 	void free();
 
-	void reserve(uint64_t count);
+	void reserve(uint32_t count);
 	vk::CommandBuffer reserveOneTimeSubmit();
+	void freeOneTimeSubmit(std::vector<vk::CommandBuffer> cmd);
 
 	Data& getData();
 

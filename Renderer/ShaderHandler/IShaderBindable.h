@@ -21,7 +21,7 @@ namespace Renderer::ShaderHandler {
 //  |Dispatch|
 //     |
 //	  \./
-// >|preTransfer barriers|<		|#| Same goes for those stages.
+// >|preTransfer barriers|<		|#| Same goes for this stages.
 //     |						|#|
 //	  \./						|#|
 //  |Transfer result|			|#|
@@ -32,39 +32,32 @@ namespace Renderer::ShaderHandler {
 //	  \./						|#|
 // >|preLoad barriers|<			|#|
 
-enum class CBStages {
-	Init, //recorded once, submited once
-	LoadData, //Recorded once, submited every time
-	DynamicLoadData, //Recorded every time for a one time submit
-	// Dispatch, is not passed to IShaderBindable as it only contains compute dispatch command and preTransferResult barriers
-	TransferResult, // recorded once, submited every time
-	DynamicTransferResult //Recorded every time for a one time submit
-};
-
-enum class BarrierStages {
-	preLoadData,
-	preDispatch,
-	preTransferResult
-};
-
 class IShaderBindable {
 public:
 	struct Barriers {
 		std::vector<vk::BufferMemoryBarrier> buff;
 		std::vector<vk::ImageMemoryBarrier> img;
+
+		void record(vk::CommandBuffer& cmd, vk::PipelineStageFlags srcStage, vk::PipelineStageFlags dstStage);
 	};
 
-	virtual Barriers collectPreLoadDataBarriers(BarrierStages stage);
-	virtual Barriers collectPreDispatchBarriers(BarrierStages stage);
-	virtual Barriers collectPreTransferResultBarriers(BarrierStages stage);
+	//as it always possible to avoid usage of one variable
+	//both as an input and as an output of a shader(just make two, on for each purpose)
+	//which means that
+	//PreLoadDataBarriers are rather preventing race condition
+	//between Compute and LoadData, than between TransferResult and LoadData
+	//so PipelineStageFlagBits::eCompute is used as srcStage
+	virtual Barriers collectPreLoadDataBarriers();
+	virtual Barriers collectPreDispatchBarriers();
+	virtual Barriers collectPreTransferResultBarriers();
 	
-	virtual void recordInit(vk::CommandBuffer cb);
-	
-	virtual void recordLoadData(vk::CommandBuffer cb);
-	virtual void recordLoadDataDynamic(vk::CommandBuffer cb);
-
-	virtual void recordTransferResult(vk::CommandBuffer cb);
-	virtual void recordTransferResultDynamic(vk::CommandBuffer cb);
+	virtual void recordInit(vk::CommandBuffer cmd);						// |#| This functions wont be called simultaneously from multiple threads
+																		// |#| (unless you pass it to multiple ShaderHandler's)
+	virtual void recordLoadData(vk::CommandBuffer cmd);					// |#| but multiple different functions can be called from different threads
+	virtual void recordLoadDataDynamic(vk::CommandBuffer cmd);			// |#| ex. recordLoadData and recordTransferResult are called at the same
+																		// |#| time from two different threads. However, this doesn't apply to recordInit
+	virtual void recordTransferResult(vk::CommandBuffer cmd);			// |#| which will be called once, prior to all other record calls
+	virtual void recordTransferResultDynamic(vk::CommandBuffer cmd);	// |#| 
 	
 	virtual std::vector<Pipeline::IDescriptorBindable*> collectSetBindables();
 	virtual std::vector<vk::PushConstantRange> collectPushConstants();

@@ -2,8 +2,7 @@
 #include <chrono>
 #include <thread>
 #include "Renderer\Core.h"
-#include "Renderer\PipelineHandler\DSetlLayoutFactory.h"
-#include "Renderer\ResourceHandler\StructuredBuffer.h"
+
 //#pragma warning(push, 0)
 //#include <vulkan\vulkan.hpp>
 //#pragma warning(pop)

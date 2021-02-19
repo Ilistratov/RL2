@@ -45,36 +45,12 @@ public:
 	//std::vector<DataComponent::CommandPoolData>& getCommandPools();
 	//std::vector<DataComponent::PipelineData>& getPipelines();
 
-	template<typename T>
-	inline void destroyDataComponent(T& component) {
-		throw std::runtime_error(gen_err_str(__FILE__, __LINE__,
-			"Can't destroyDataComponent for " + std::string(typeid(T).name()))
-		);
-	}
-
-	template<typename T>
-	inline void destroyDataComponent(std::vector<T>& components) {
-		for (auto& component : components) {
-			destroyDataComponent(component);
-		}
-	}
-
 	~RendererCore();
 };
 
 //TODO
 //add specializations of destroyDataComponent
 //for each used DataComponent
-
-template<>
-inline void RendererCore::destroyDataComponent(DataComponent::ImageData& component) {
-	component.ext = vk::Extent2D{ 0, 0 };
-	component.fmt = vk::Format::eUndefined;
-	component.sz = 0;
-	
-	device().destroyImage(component.img);
-	device().freeMemory(component.mem);
-}
 
 //safety/sanity sacrificed to convenience
 //for INTERNAL use ONLY

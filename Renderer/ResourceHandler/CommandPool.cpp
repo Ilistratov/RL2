@@ -2,7 +2,7 @@
 
 namespace Renderer::ResourceHandler {
 
-CommandPool::CommandPool(uint64_t queueInd) {
+CommandPool::CommandPool(uint32_t queueInd) {
 	data.pool = core.device().createCommandPool(
 		vk::CommandPoolCreateInfo{
 			vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
@@ -34,7 +34,7 @@ void CommandPool::free() {
 	data.pool = vk::CommandPool{};
 }
 
-void CommandPool::reserve(uint64_t count) {
+void CommandPool::reserve(uint32_t count) {
 	if (count <= data.cmd.size()) {
 		return;
 	}
@@ -59,6 +59,10 @@ vk::CommandBuffer CommandPool::reserveOneTimeSubmit() {
 			1
 		}
 	)[0];
+}
+
+void CommandPool::freeOneTimeSubmit(std::vector<vk::CommandBuffer> cmd) {
+	core.device().freeCommandBuffers(data.pool, cmd);
 }
 
 CommandPool::Data& CommandPool::getData() {

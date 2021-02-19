@@ -26,6 +26,10 @@ StructuredBuffer::StructuredBuffer(StructuredBuffer&& other) {
 }
 
 void StructuredBuffer::operator=(StructuredBuffer&& other) {
+	if (this == &other) {
+		return;
+	}
+
 	swap(other);
 	other.free();
 }

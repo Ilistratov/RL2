@@ -4,8 +4,6 @@
 #include <vulkan\vulkan.hpp>
 #pragma warning(pop)
 
-#include "DataComponent\ImageData.h"
-
 namespace Renderer {
 //TODO
 //finish swapchain

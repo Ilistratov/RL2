@@ -10,7 +10,7 @@ class DescriptorBinding {
 	std::vector<vk::DescriptorBufferInfo> buff;
 	std::vector<vk::DescriptorImageInfo> img;
 
-	uint32_t bindingId = UINT64_MAX;
+	uint32_t bindingId = UINT32_MAX;
 
 	vk::ShaderStageFlags stage;
 	vk::DescriptorType type;

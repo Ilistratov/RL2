@@ -93,6 +93,10 @@ void DPoolHandler::operator=(DPoolHandler&& other) {
 }
 
 void DPoolHandler::swap(DPoolHandler& other) {
+	if (this == &other) {
+		return;
+	}
+
 	std::swap(data, other.data);
 }
 

@@ -54,6 +54,10 @@ void ImageBase::operator=(ImageBase&& other) {
 }
 
 void ImageBase::swap(ImageBase& other) {
+	if (this == &other) {
+		return;
+	}
+
 	std::swap(data, other.data);
 }
 

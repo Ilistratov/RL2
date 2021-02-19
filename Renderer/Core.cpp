@@ -17,18 +17,8 @@ vk::Device RendererCore::device() {
 SwapchainHndl& RendererCore::swapchain() {
 	return swpch;
 }
-
-std::vector<DataComponent::BufferData>& RendererCore::getBuffers() {
-	return bffs;
-}
-
 RendererCore::~RendererCore() {
 	device().waitIdle();
-
-	destroyDataComponent(cmdPools);
-	destroyDataComponent(dPools);
-	destroyDataComponent(imgs);
-	destroyDataComponent(bffs);
 }
 
 RendererCore core;
