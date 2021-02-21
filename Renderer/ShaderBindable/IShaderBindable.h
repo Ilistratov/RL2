@@ -2,7 +2,7 @@
 
 #include "Renderer\PipelineHandler\DescriptorBinding.h"
 
-namespace Renderer::ShaderHandler {
+namespace Renderer::ShaderBindable {
 
 // |Init| at start
 //

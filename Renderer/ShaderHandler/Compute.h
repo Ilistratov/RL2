@@ -2,7 +2,7 @@
 
 #include "Renderer\PipelineHandler\Compute.h"
 #include "Renderer\ResourceHandler\CommandPool.h"
-#include "IShaderBindable.h"
+#include "Renderer\ShaderBindable\IShaderBindable.h"
 
 namespace Renderer::ShaderHandler {
 
@@ -11,17 +11,18 @@ class Compute {
 	Pipeline::Compute pipeline;
 	
 	ResourceHandler::CommandPool cmdPool;
-	IShaderBindable* bnd = nullptr;
+	ShaderBindable::IShaderBindable* bnd = nullptr;
 
 	std::tuple<int, int, int> dispatchDim = { 0, 0, 0 };
+
+	vk::CommandBuffer loadDataDynamicCB;
+	vk::CommandBuffer transferResultDynamicCB;
 
 	vk::Fence submissionFinished;
 	vk::Semaphore loadDataFinished;
 	vk::Semaphore dispatchFinished;
 
 	vk::CommandBuffer recordInit();
-	vk::CommandBuffer recordLoadDataDynamic();
-	vk::CommandBuffer recordTransferResultDynamic();
 
 	void waitSubmissionFin();
 	void resetSubmissionFin();
@@ -37,7 +38,7 @@ public:
 	Compute() = default;
 
 	Compute(
-		IShaderBindable* bnd,
+		ShaderBindable::IShaderBindable* bnd,
 		const std::string& shaderFilePath,
 		const std::string& shaderMain,
 		std::tuple<int, int, int> dispatchDim

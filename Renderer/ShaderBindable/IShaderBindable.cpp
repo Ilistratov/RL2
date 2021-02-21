@@ -1,6 +1,6 @@
 #include "IShaderBindable.h"
 
-namespace Renderer::ShaderHandler {
+namespace Renderer::ShaderBindable {
 
 IShaderBindable::Barriers IShaderBindable::collectPreLoadDataBarriers() { return {}; }
 IShaderBindable::Barriers IShaderBindable::collectPreDispatchBarriers() { return {}; }
