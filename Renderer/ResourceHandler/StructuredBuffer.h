@@ -34,6 +34,10 @@ public:
 		const std::vector<StructuredBufferCopy>& copyRegions = {}
 	);
 
+	std::vector<vk::BufferCopy>&& toBufferCopy(const std::vector<StructuredBufferCopy>& cpyReg);
+
+	vk::BufferMemoryBarrier genUploadBarrier();
+
 	void swap(StructuredBuffer& other);
 	void free();
 };

@@ -6,15 +6,17 @@ namespace Renderer::Pipeline {
 DescriptorBinding::DescriptorBinding(
 	std::vector<vk::DescriptorBufferInfo> buff,
 	std::vector<vk::DescriptorImageInfo> img,
-	uint32_t bindingId,
 	vk::ShaderStageFlags stage,
 	vk::DescriptorType type) :
 	buff(buff),
 	img(img),
-	bindingId(bindingId),
 	stage(stage),
 	type(type) {
 	assert((img.empty() != buff.empty(), "One and only one of img/buff must contain a minimum of one element"));
+}
+
+void DescriptorBinding::setBindingId(uint32_t nId) {
+	bindingId = nId;
 }
 
 
@@ -42,6 +44,19 @@ vk::DescriptorSetLayoutBinding DescriptorBinding::getLayoutBinding() const {
 	};
 }
 
-std::vector<DescriptorBinding> IDescriptorBindable::getBindings() const { return {}; }
+//std::vector<DescriptorBinding> IDescriptorBindable::getBindings() const { return {}; }
+
+SetBindable::SetBindable(const std::vector<IDescriptorBindable*>& bnd) {
+	bindings.resize(bnd.size());
+	
+	for (uint32_t i = 0; i < bnd.size(); i++) {
+		bindings[i] = bnd[i]->getBinding();
+		bindings[i].setBindingId(i);
+	}
+}
+
+const std::vector<DescriptorBinding>& SetBindable::getBindings() const {
+	return bindings;
+}
 
 }

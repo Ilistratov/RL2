@@ -32,7 +32,7 @@ namespace Renderer::ShaderBindable {
 //	  \./						|#|
 // >|preLoad barriers|<			|#|
 
-class IShaderBindable {
+class IShaderControlable {
 public:
 	struct Barriers {
 		std::vector<vk::BufferMemoryBarrier> buff;
@@ -47,9 +47,9 @@ public:
 	//PreLoadDataBarriers are rather preventing race condition
 	//between Compute and LoadData, than between TransferResult and LoadData
 	//so PipelineStageFlagBits::eCompute is used as srcStage
-	virtual Barriers collectPreLoadDataBarriers();
-	virtual Barriers collectPreDispatchBarriers();
-	virtual Barriers collectPreTransferResultBarriers();
+	virtual Barriers&& collectPreLoadDataBarriers();
+	virtual Barriers&& collectPreDispatchBarriers();
+	virtual Barriers&& collectPreTransferResultBarriers();
 	
 	virtual void recordInit(vk::CommandBuffer cmd);						// |#| This functions wont be called simultaneously from multiple threads
 																		// |#| (unless you pass it to multiple ShaderHandler's)
@@ -58,9 +58,14 @@ public:
 																		// |#| time from two different threads. However, this doesn't apply to recordInit
 	virtual void recordTransferResult(vk::CommandBuffer cmd);			// |#| which will be called once, prior to all other record calls
 	virtual void recordTransferResultDynamic(vk::CommandBuffer cmd);	// |#| 
-	
-	virtual std::vector<Pipeline::IDescriptorBindable*> collectSetBindables();
-	virtual std::vector<vk::PushConstantRange> collectPushConstants();
 };
+
+//TODO
+//make separate classes for controling shader variables and for binding them initially
+//binding can be done via this class
+//controlling via IShaderControlable
+
+//class IControlableDescriptorBindable : public IShaderControlable, public Pipeline::IDescriptorBindable {};
+//class IControlableShaderBindable : public IShaderControlable, public IShaderBindable {};
 
 }

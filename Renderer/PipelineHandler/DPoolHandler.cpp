@@ -5,13 +5,13 @@
 namespace Renderer::Pipeline {
 
 DPoolHandler::DPoolHandler(
-	const std::vector<IDescriptorBindable*>& setBindables
+	const std::vector<SetBindable>& setBindables
 ) {
 	std::vector<std::vector<DescriptorBinding>> setBindings;
 	setBindings.reserve(setBindables.size());
 
 	for (const auto& bindable : setBindables) {
-		setBindings.push_back(bindable->getBindings());
+		setBindings.push_back(bindable.getBindings());
 	}
 
 	data.layts.reserve(setBindings.size());

@@ -70,4 +70,16 @@ BufferBase::~BufferBase() {
 	free();
 }
 
+vk::BufferMemoryBarrier BufferBase::genMemoryBarrier(vk::AccessFlags srcAccess, vk::AccessFlags dstAccess) {
+	return vk::BufferMemoryBarrier{
+		srcAccess,
+		dstAccess,
+		{VK_QUEUE_FAMILY_IGNORED},
+		{VK_QUEUE_FAMILY_IGNORED},
+		data.buff,
+		0,
+		data.sz
+	};
+}
+
 }

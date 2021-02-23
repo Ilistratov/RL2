@@ -2,7 +2,7 @@
 
 #include "Renderer\PipelineHandler\Compute.h"
 #include "Renderer\ResourceHandler\CommandPool.h"
-#include "Renderer\ShaderBindable\IShaderBindable.h"
+#include "Renderer\ShaderBindable\IShaderControlable.h"
 
 namespace Renderer::ShaderHandler {
 
@@ -11,7 +11,7 @@ class Compute {
 	Pipeline::Compute pipeline;
 	
 	ResourceHandler::CommandPool cmdPool;
-	ShaderBindable::IShaderBindable* bnd = nullptr;
+	ShaderBindable::IShaderControlable* ctr = nullptr;
 
 	std::tuple<int, int, int> dispatchDim = { 0, 0, 0 };
 
@@ -38,7 +38,9 @@ public:
 	Compute() = default;
 
 	Compute(
-		ShaderBindable::IShaderBindable* bnd,
+		ShaderBindable::IShaderControlable* ctr,
+		const std::vector<Pipeline::SetBindable>& bnd,
+		const std::vector<vk::PushConstantRange>& pushConstants,
 		const std::string& shaderFilePath,
 		const std::string& shaderMain,
 		std::tuple<int, int, int> dispatchDim
@@ -47,10 +49,10 @@ public:
 	Compute(Compute&& other);
 	void operator =(Compute&& other);
 
+	void dispatch();
+
 	void swap(Compute& other);
 	void free();
-
-	void dispatch();
 
 	~Compute();
 };

@@ -1,8 +1,10 @@
 cmake_minimum_required (VERSION 3.8)
 
 set(SRCS 
-	IShaderBindable.h
-	IShaderBindable.cpp
+	IShaderControlable.h
+	IShaderControlable.cpp
+	BindableStructuredBuffer.cpp
+	BindableStructuredBuffer.h
 )
 
 add_library(ShaderBindable ${SRCS})

@@ -36,6 +36,8 @@ public:
 	~BufferBase();
 protected:
 	Data data;
+
+	vk::BufferMemoryBarrier genMemoryBarrier(vk::AccessFlags srcAccess, vk::AccessFlags dstAccess);
 };
 
 }

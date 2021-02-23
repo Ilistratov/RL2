@@ -58,6 +58,17 @@ void StructuredBuffer::recordCopyFrom(
 	cb.copyBuffer(src.getData().buff, data.buff, cpyReg);
 }
 
+std::vector<vk::BufferCopy>&& StructuredBuffer::toBufferCopy(const std::vector<StructuredBufferCopy>& cpyReg) {
+	std::vector<vk::BufferCopy> res(cpyReg.size());
+	for (uint64_t i = 0; i < cpyReg.size(); i++) {
+		res[i] = cpyReg[i](stride);
+	}
+}
+
+vk::BufferMemoryBarrier StructuredBuffer::genUploadBarrier() {
+	return genMemoryBarrier(vk::AccessFlagBits::eTransferWrite, vk::AccessFlagBits::eShaderRead)
+}
+
 void StructuredBuffer::swap(StructuredBuffer& other) {
 	BufferBase::swap(other);
 	std::swap(count, other.count);

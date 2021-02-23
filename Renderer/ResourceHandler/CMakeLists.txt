@@ -5,6 +5,8 @@ set(SRCS
 	CommandPool.cpp
 	BufferBase.h
 	BufferBase.cpp
+	StagingBuffer.cpp
+	StagingBuffer.h
 	StructuredBuffer.h
 	StructuredBuffer.cpp
 	ImageBase.h

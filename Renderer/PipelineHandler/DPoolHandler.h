@@ -26,7 +26,7 @@ public:
 	void swap(DPoolHandler& other);
 	void free();
 	
-	DPoolHandler(const std::vector<IDescriptorBindable*>& setBindables);
+	DPoolHandler(const std::vector<SetBindable>& setBindables);
 	
 	Data& getData();
 	const Data& getData() const;

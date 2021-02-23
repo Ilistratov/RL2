@@ -12,7 +12,7 @@ vk::CommandBuffer Compute::recordInit() {
 		}
 	);
 
-	bnd->recordInit(initCB);
+	ctr->recordInit(initCB);
 
 	initCB.end();
 
@@ -28,7 +28,7 @@ void Compute::resetSubmissionFin() {
 }
 
 void Compute::recordLoadData() {
-	auto barriers = bnd->collectPreLoadDataBarriers();
+	auto barriers = ctr->collectPreLoadDataBarriers();
 	vk::CommandBuffer& cmd = cmdPool.getData().cmd[0];
 
 	cmd.begin(vk::CommandBufferBeginInfo{});
@@ -38,13 +38,13 @@ void Compute::recordLoadData() {
 		vk::PipelineStageFlagBits::eComputeShader,
 		vk::PipelineStageFlagBits::eTransfer
 	);
-	bnd->recordLoadData(cmd);
+	ctr->recordLoadData(cmd);
 
 	cmd.end();
 }
 
 void Compute::recordDispatch() {
-	auto barriers = bnd->collectPreDispatchBarriers();
+	auto barriers = ctr->collectPreDispatchBarriers();
 	vk::CommandBuffer& cmd = cmdPool.getData().cmd[1];
 	
 	cmd.begin(vk::CommandBufferBeginInfo{});
@@ -64,7 +64,7 @@ void Compute::recordDispatch() {
 }
 
 void Compute::recordTransferResult() {
-	auto barriers = bnd->collectPreTransferResultBarriers();
+	auto barriers = ctr->collectPreTransferResultBarriers();
 	vk::CommandBuffer& cmd = cmdPool.getData().cmd[2];
 
 	cmd.begin(vk::CommandBufferBeginInfo{});
@@ -77,16 +77,18 @@ void Compute::recordTransferResult() {
 }
 
 Compute::Compute(
-	ShaderBindable::IShaderBindable* bnd, // only one as inside it can hold as much complexity as we want
+	ShaderBindable::IShaderControlable* ctr,
+	const std::vector<Pipeline::SetBindable>& bnd,
+	const std::vector<vk::PushConstantRange>& pushConstants,
 	const std::string& shaderFilePath,
 	const std::string& shaderMain,
 	std::tuple<int, int, int> dispatchDim
-) : bnd(bnd), dispatchDim(dispatchDim) {
-	dPool = Pipeline::DPoolHandler(bnd->collectSetBindables());
+) : ctr(ctr), dispatchDim(dispatchDim) {
+	dPool = Pipeline::DPoolHandler(bnd);
 	
 	pipeline = Pipeline::Compute(
 		dPool,
-		bnd->collectPushConstants(),
+		pushConstants,
 		shaderFilePath,
 		shaderMain
 	);
@@ -154,7 +156,7 @@ void Compute::swap(Compute& other) {
 	std::swap(loadDataDynamicCB, other.loadDataDynamicCB);
 	std::swap(transferResultDynamicCB, other.transferResultDynamicCB);
 
-	std::swap(bnd, other.bnd);
+	std::swap(ctr, other.ctr);
 	std::swap(dispatchDim, other.dispatchDim);
 	
 	std::swap(submissionFinished, other.submissionFinished);
@@ -171,7 +173,7 @@ void Compute::free() {
 	cmdPool.freeOneTimeSubmit({ loadDataDynamicCB, transferResultDynamicCB });
 	cmdPool.free();
 
-	bnd = nullptr; //it's only a callback pointer, so we are not responsible for this resource
+	ctr = nullptr; //it's only a callback pointer, so we are not responsible for this resource
 	dispatchDim = { 0, 0, 0 };
 	
 	core.device().destroyFence(submissionFinished);
@@ -187,10 +189,10 @@ void Compute::dispatch() {
 	waitSubmissionFin();
 	
 	loadDataDynamicCB.reset();
-	bnd->recordLoadDataDynamic(loadDataDynamicCB);
+	ctr->recordLoadDataDynamic(loadDataDynamicCB);
 	
 	transferResultDynamicCB.reset();
-	bnd->recordTransferResultDynamic(transferResultDynamicCB);
+	ctr->recordTransferResultDynamic(transferResultDynamicCB);
 
 	std::vector<vk::CommandBuffer> loadDataSubmitCB = { cmdPool.getData().cmd[0], loadDataDynamicCB };
 
