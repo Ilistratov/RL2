@@ -18,7 +18,7 @@ class BindableStructuredBuffer : public Pipeline::IDescriptorBindable, public Sh
 	using STGUPtr = std::unique_ptr<ResourceHandler::StagingBuffer>;
 	STGUPtr srcCopy;
 	std::vector<ResourceHandler::StructuredBufferCopy> copyRegions;
-	bool srcCopyPending = false;
+	bool isSrcPendingCopy = false;
 
 public:
 	//TODO
@@ -26,6 +26,14 @@ public:
 	BindableStructuredBuffer& operator =(const BindableStructuredBuffer&) = delete;
 
 	BindableStructuredBuffer(ResourceHandler::StructuredBuffer&& buff, vk::ShaderStageFlags visibleStages = vk::ShaderStageFlagBits::eAll);
+
+	BindableStructuredBuffer(BindableStructuredBuffer&& other);
+	void operator =(BindableStructuredBuffer&& other);
+
+	void swap(BindableStructuredBuffer& other);
+	
+	//not thread safe
+	void free();
 
 	//if there was no srcCopy assigned before, returns nullptr
 	//otherwise, will return ownership of previously assigned srcCopy.

@@ -12,78 +12,81 @@ vk::CommandBuffer Compute::recordInit() {
 		}
 	);
 
-	ctr->recordInit(initCB);
+	inputCtr->recordInit(initCB);
+	outputCtr->recordInit(initCB);
 
 	initCB.end();
 
 	return initCB;
 }
 
-void Compute::waitSubmissionFin() {
-	core.device().waitForFences(submissionFinished, true, UINT64_MAX);
-}
-
-void Compute::resetSubmissionFin() {
-	core.device().resetFences(submissionFinished);
-}
-
-void Compute::recordLoadData() {
-	auto barriers = ctr->collectPreLoadDataBarriers();
+void Compute::recordInputRegularCB() {
 	vk::CommandBuffer& cmd = cmdPool.getData().cmd[0];
 
 	cmd.begin(vk::CommandBufferBeginInfo{});
-	
-	barriers.record(
-		cmd,
-		vk::PipelineStageFlagBits::eComputeShader,
-		vk::PipelineStageFlagBits::eTransfer
-	);
-	ctr->recordLoadData(cmd);
-
+	inputCtr->recordRegular(cmd);
 	cmd.end();
 }
 
-void Compute::recordDispatch() {
-	auto barriers = ctr->collectPreDispatchBarriers();
+void Compute::recordDispatchCB() {
 	vk::CommandBuffer& cmd = cmdPool.getData().cmd[1];
 	
 	cmd.begin(vk::CommandBufferBeginInfo{});
 	
-	barriers.record(
-		cmd,
-		vk::PipelineStageFlagBits::eTransfer,
-		vk::PipelineStageFlagBits::eComputeShader
-	);
-
 	cmd.bindPipeline(vk::PipelineBindPoint::eCompute, pipeline.getData().ppln);
 	cmd.bindDescriptorSets(vk::PipelineBindPoint::eCompute, pipeline.getData().layt, 0, dPool.getData().sets, {});
+	
 	auto [x, y, z] = dispatchDim;
 	cmd.dispatch(x, y, z);
 
 	cmd.end();
 }
 
-void Compute::recordTransferResult() {
-	auto barriers = ctr->collectPreTransferResultBarriers();
+void Compute::recordOutputRegularCB() {
 	vk::CommandBuffer& cmd = cmdPool.getData().cmd[2];
 
 	cmd.begin(vk::CommandBufferBeginInfo{});
+	outputCtr->recordRegular(cmd);
+	cmd.end();
+}
 
-	barriers.record(
-		cmd,
-		vk::PipelineStageFlagBits::eComputeShader,
-		vk::PipelineStageFlagBits::eTransfer
+void Compute::recordInputDynamicCB() {
+	core.device().waitSemaphores(
+		vk::SemaphoreWaitInfo{
+			{},
+			inputFinished,
+			inputFinishedWaitVal
+		},
+		UINT64_MAX
 	);
+
+	inputDynamicCB.reset();
+	inputCtr->recordDynamic(inputDynamicCB);
+}
+
+void Compute::recordOutputDynamicCB() {
+	core.device().waitSemaphores(
+		vk::SemaphoreWaitInfo{
+			{},
+			outputFinished,
+			outputFinishedWaitVal
+		},
+		UINT64_MAX
+	);
+
+	outputDynamicCB.reset();
+	outputCtr->recordDynamic(outputDynamicCB);
 }
 
 Compute::Compute(
-	ShaderBindable::IShaderControlable* ctr,
+	ShaderBindable::IShaderInput* inputCtr,
+	ShaderBindable::IShaderOutput* outputCtr,
 	const std::vector<Pipeline::SetBindable>& bnd,
 	const std::vector<vk::PushConstantRange>& pushConstants,
 	const std::string& shaderFilePath,
 	const std::string& shaderMain,
 	std::tuple<int, int, int> dispatchDim
-) : ctr(ctr), dispatchDim(dispatchDim) {
+) : inputCtr(inputCtr), outputCtr(outputCtr), dispatchDim(dispatchDim) {
 	dPool = Pipeline::DPoolHandler(bnd);
 	
 	pipeline = Pipeline::Compute(
@@ -93,7 +96,7 @@ Compute::Compute(
 		shaderMain
 	);
 
-	submissionFinished = core.device().createFence(
+	auto initFinished = core.device().createFence(
 		vk::FenceCreateInfo{
 			vk::FenceCreateFlagBits::eSignaled
 		}
@@ -108,23 +111,39 @@ Compute::Compute(
 			initCB,
 			{}
 		},
-		submissionFinished
+		initFinished
 	);
 
 	cmdPool = ResourceHandler::CommandPool(core.apiBase().queueInd(vk::QueueFlagBits::eCompute));
 	cmdPool.reserve(3);
 
-	auto ldAsync = std::async(&Compute::recordLoadData, this);
-	auto dAsync = std::async(&Compute::recordDispatch, this);
-	auto trAsync = std::async(&Compute::recordTransferResult, this);
+	auto ldAsync = std::async(&Compute::recordInputRegularCB, this);
+	auto dAsync = std::async(&Compute::recordInputRegularCB, this);
+	auto trAsync = std::async(&Compute::recordOutputRegularCB, this);
 
-	loadDataFinished = core.device().createSemaphore(vk::SemaphoreCreateInfo{});
-	dispatchFinished = core.device().createSemaphore(vk::SemaphoreCreateInfo{});
+	vk::SemaphoreTypeCreateInfo inputFinishedTCI{
+		vk::SemaphoreType::eTimeline,
+		0
+	};
 
-	loadDataDynamicCB = cmdPool.reserveOneTimeSubmit();
-	transferResultDynamicCB = cmdPool.reserveOneTimeSubmit();
+	vk::SemaphoreTypeCreateInfo dispatchFinishedTCI{
+		vk::SemaphoreType::eTimeline,
+		0
+	};
 
-	waitSubmissionFin();
+	vk::SemaphoreTypeCreateInfo outputFinishedTCI{
+		vk::SemaphoreType::eTimeline,
+		0
+	};
+
+	inputFinished = core.device().createSemaphore(vk::SemaphoreCreateInfo().setPNext(inputFinished));
+	dispatchFinished = core.device().createSemaphore(vk::SemaphoreCreateInfo().setPNext(dispatchFinished));
+	outputFinished = core.device().createSemaphore(vk::SemaphoreCreateInfo().setPNext(outputFinished));
+
+	inputDynamicCB = cmdPool.reserveOneTimeSubmit();
+	outputDynamicCB = cmdPool.reserveOneTimeSubmit();
+
+	core.device().waitForFences(initFinished, true, UINT64_MAX);
 	cmdPool.freeOneTimeSubmit({ initCB });
 
 	ldAsync.wait();
@@ -146,81 +165,144 @@ void Compute::operator =(Compute&& other) {
 }
 
 void Compute::swap(Compute& other) {
-	waitSubmissionFin();
-	other.waitSubmissionFin();
-	
 	dPool.swap(other.dPool);
 	pipeline.swap(other.pipeline);
 	cmdPool.swap(other.cmdPool);
 
-	std::swap(loadDataDynamicCB, other.loadDataDynamicCB);
-	std::swap(transferResultDynamicCB, other.transferResultDynamicCB);
+	std::swap(inputDynamicCB, other.inputDynamicCB);
+	std::swap(outputDynamicCB, other.outputDynamicCB);
 
-	std::swap(ctr, other.ctr);
+	std::swap(inputCtr, other.inputCtr);
+	std::swap(outputCtr, other.outputCtr);
+	
 	std::swap(dispatchDim, other.dispatchDim);
 	
-	std::swap(submissionFinished, other.submissionFinished);
-	std::swap(loadDataFinished, other.loadDataFinished);
+	std::swap(inputFinished, other.inputFinished);
+	std::swap(inputFinishedWaitVal, other.inputFinishedWaitVal);
+	
 	std::swap(dispatchFinished, other.dispatchFinished);
+	std::swap(dispatchFinishedWaitVal, other.dispatchFinishedWaitVal);
+	
+	std::swap(outputFinished, other.outputFinished);
+	std::swap(outputFinishedWaitVal, other.outputFinishedWaitVal);
 }
 
 void Compute::free() {
-	waitSubmissionFin();
-
 	dPool.free();
 	pipeline.free();
 
-	cmdPool.freeOneTimeSubmit({ loadDataDynamicCB, transferResultDynamicCB });
+	cmdPool.freeOneTimeSubmit({ inputDynamicCB, outputDynamicCB });
+	inputDynamicCB = vk::CommandBuffer{};
+	outputDynamicCB = vk::CommandBuffer{};
 	cmdPool.free();
 
-	ctr = nullptr; //it's only a callback pointer, so we are not responsible for this resource
+	inputCtr = nullptr; //it's only a callback pointer, so we are not responsible for this resource
+	outputCtr = nullptr; //it's only a callback pointer, so we are not responsible for this resource
 	dispatchDim = { 0, 0, 0 };
 	
-	core.device().destroyFence(submissionFinished);
-	core.device().destroySemaphore(loadDataFinished);
-	core.device().destroySemaphore(dispatchFinished);
+	core.device().destroySemaphore(inputFinished);
+	inputFinishedWaitVal = 0;
 
-	submissionFinished = vk::Fence{};
-	loadDataFinished = vk::Semaphore();
-	dispatchFinished = vk::Semaphore();
+	core.device().destroySemaphore(dispatchFinished);
+	dispatchFinishedWaitVal = 0;
+
+	core.device().destroySemaphore(outputFinished);
+	outputFinishedWaitVal = 0;
+
+	inputFinished = vk::Semaphore{};
+	dispatchFinished = vk::Semaphore{};
+	outputFinished = vk::Semaphore{};
 }
 
+// WTF
+// Input:
+//  in order do record input dynamic
+//  host waits on inputFinishedWaitVal
+//  then it record inputDynamic.
+//  on device it waits for previous dispatch to finish(dispatchWaitVal)
+//  at this point, inputCB's can
+//  be submitted, inputFinishedWaitVal can be incremented
+// Dispatch:
+//  on device waits for outputCB from previous iteration
+//  and inputCB from present iteration to finish (outputFinishedWaitVal, inputFinishedWaitVal)
+//  dispatchFinishedWaitVal is incremented
+//  it will be signaled when dispatch is done
+// Output:
+//  just like input, makes host wait for previous
+//  output(outputFinishedWaitVal) to finish(bc can't reset outputDynamic while it's being executed)
+//  on device waits for dispatchFinished
+//  then signals outputFinished with ++outputFinishedWaitVal
 void Compute::dispatch() {
-	waitSubmissionFin();
+	recordInputDynamicCB();
 	
-	loadDataDynamicCB.reset();
-	ctr->recordLoadDataDynamic(loadDataDynamicCB);
-	
-	transferResultDynamicCB.reset();
-	ctr->recordTransferResultDynamic(transferResultDynamicCB);
+	//transferResultDynamicCB.reset();
+	//ctr->recordTransferResultDynamic(transferResultDynamicCB);
 
-	std::vector<vk::CommandBuffer> loadDataSubmitCB = { cmdPool.getData().cmd[0], loadDataDynamicCB };
+	std::vector<vk::CommandBuffer> inputSubmitCB = { cmdPool.getData().cmd[0], inputDynamicCB };
 
-	vk::SubmitInfo loadDataSubmit{
-		{},
-		{},
-		loadDataDynamicCB,
-		loadDataFinished
+	vk::TimelineSemaphoreSubmitInfo inputSubmitTimelineInfo {
+		dispatchFinishedWaitVal, //wait
+		++inputFinishedWaitVal //signal
+	};
+
+	vk::SubmitInfo inputSubmit{
+		dispatchFinished,
+		vk::PipelineStageFlags(vk::PipelineStageFlagBits::eTransfer),
+		inputSubmitCB,
+		inputFinished
+	};
+
+	inputSubmit.setPNext(&inputSubmitTimelineInfo);
+
+	std::vector<uint64_t> dispatchSubmitWaitVal = {
+		inputFinishedWaitVal, //from this iteration
+		outputFinishedWaitVal //from previous iteration
+	};
+
+	vk::TimelineSemaphoreSubmitInfo dispatchSubmitTimelineInfo{
+		dispatchSubmitWaitVal, //wait
+		++dispatchFinishedWaitVal //signal
+	};
+
+	std::vector<vk::Semaphore> dispatchSubmitWaitSemaphores = {
+		inputFinished,
+		outputFinished
+	};
+
+	std::vector<vk::PipelineStageFlags> dispatchSubmitWaitStageFlags = {
+		vk::PipelineStageFlagBits::eComputeShader,
+		vk::PipelineStageFlagBits::eComputeShader
 	};
 
 	vk::SubmitInfo dispatchSubmit = {
-		loadDataFinished,
-		vk::PipelineStageFlags(vk::PipelineStageFlagBits::eComputeShader),
+		dispatchSubmitWaitSemaphores,
+		dispatchSubmitWaitStageFlags,
 		cmdPool.getData().cmd[1],
 		dispatchFinished
 	};
 
-	std::vector<vk::CommandBuffer> transferResultSubmitCB = { cmdPool.getData().cmd[2], transferResultDynamicCB };
+	dispatchSubmit.setPNext(&dispatchSubmitTimelineInfo);
+	core.apiBase().computeQueue().submit({ inputSubmit, dispatchSubmit});
 
-	vk::SubmitInfo transferResultSubmit = {
-		dispatchFinished,
-		vk::PipelineStageFlags(vk::PipelineStageFlagBits::eTransfer),
-		transferResultSubmitCB,
-		{}
+	recordOutputDynamicCB();
+
+	vk::TimelineSemaphoreSubmitInfo outputSubmitTimelineInfo{
+		dispatchFinishedWaitVal, //wait
+		++outputFinishedWaitVal //signal
 	};
 
-	resetSubmissionFin();
-	core.apiBase().computeQueue().submit({ loadDataSubmit, dispatchSubmit, transferResultSubmit }, submissionFinished);
+	std::vector<vk::CommandBuffer> outputSubmitCB = { cmdPool.getData().cmd[2], outputDynamicCB };
+
+	vk::SubmitInfo outputSubmit{
+		dispatchFinished,
+		vk::PipelineStageFlags(vk::PipelineStageFlagBits::eTransfer),
+		outputSubmitCB,
+		outputFinished
+	};
+
+	outputSubmit.setPNext(&outputSubmitTimelineInfo);
+
+	core.apiBase().computeQueue().submit(outputSubmit);
 }
 
 Compute::~Compute() {
