@@ -100,6 +100,24 @@ vk::ImageSubresourceRange ImageBase::getSubresourceRange() const {
 	};
 }
 
+vk::ImageView ImageBase::createImageView() {
+	return core.device().createImageView(
+		vk::ImageViewCreateInfo{
+			{},
+			data.img,
+			vk::ImageViewType::e2D,
+			data.fmt,
+			vk::ComponentMapping {
+				vk::ComponentSwizzle::eIdentity,
+				vk::ComponentSwizzle::eIdentity,
+				vk::ComponentSwizzle::eIdentity,
+				vk::ComponentSwizzle::eIdentity
+			},
+			getSubresourceRange()
+		}
+	);
+}
+
 ImageBase::~ImageBase() {
 	free();
 }

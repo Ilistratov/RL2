@@ -1,22 +1,22 @@
-#include "BindableStructuredBuffer.h"
+#include "StructuredBuffer.h"
 
 namespace Renderer::ShaderBindable {
 
-BindableStructuredBuffer::BindableStructuredBuffer(
+StructuredBuffer::StructuredBuffer(
 	ResourceHandler::StructuredBuffer&& buff,
 	vk::ShaderStageFlags visibleStages
 ) : buff(std::move(buff)), visibleStages(visibleStages), srcCopy(nullptr) {}
 
-BindableStructuredBuffer::BindableStructuredBuffer(BindableStructuredBuffer&& other) {
+StructuredBuffer::StructuredBuffer(StructuredBuffer&& other) {
 	swap(other);
 }
 
-void BindableStructuredBuffer::operator=(BindableStructuredBuffer&& other) {
+void StructuredBuffer::operator=(StructuredBuffer&& other) {
 	swap(other);
 	other.free();
 }
 
-void BindableStructuredBuffer::swap(BindableStructuredBuffer& other) {
+void StructuredBuffer::swap(StructuredBuffer& other) {
 	std::scoped_lock lock(srcCopyAccess, other.srcCopyAccess);
 	buff.swap(other.buff);
 	std::swap(visibleStages, other.visibleStages);
@@ -25,7 +25,7 @@ void BindableStructuredBuffer::swap(BindableStructuredBuffer& other) {
 	std::swap(isSrcPendingCopy, other.isSrcPendingCopy);
 }
 
-void BindableStructuredBuffer::free() {
+void StructuredBuffer::free() {
 	buff.free();
 	visibleStages = vk::ShaderStageFlags{};
 	
@@ -37,7 +37,7 @@ void BindableStructuredBuffer::free() {
 	isSrcPendingCopy = false;
 }
 
-BindableStructuredBuffer::STGUPtr&& BindableStructuredBuffer::swapCopySrcStgBuff(
+StructuredBuffer::STGUPtr&& StructuredBuffer::swapCopySrcStgBuff(
 	STGUPtr&& n_srcCopy,
 	std::vector<ResourceHandler::StructuredBufferCopy>&& n_copyRegions = {}
 ) {
@@ -47,7 +47,7 @@ BindableStructuredBuffer::STGUPtr&& BindableStructuredBuffer::swapCopySrcStgBuff
 	return std::move(srcCopy);
 }
 
-Pipeline::DescriptorBinding BindableStructuredBuffer::getBinding() const {
+Pipeline::DescriptorBinding StructuredBuffer::getBinding() const {
 	return Pipeline::DescriptorBinding{
 		{ vk::DescriptorBufferInfo{ } },
 		{},
@@ -56,7 +56,7 @@ Pipeline::DescriptorBinding BindableStructuredBuffer::getBinding() const {
 	};
 }
 
-void BindableStructuredBuffer::recordLoadDataDynamic(vk::CommandBuffer cmd) {
+void StructuredBuffer::recordDynamic(vk::CommandBuffer cmd) {
 	std::scoped_lock lock(srcCopyAccess);
 	
 	if (isSrcPendingCopy) {

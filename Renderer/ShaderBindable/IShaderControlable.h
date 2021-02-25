@@ -39,4 +39,17 @@ public:
 	virtual void recordDynamic(vk::CommandBuffer cmd);
 };
 
+// Even more generic way is possible
+// An abstract class with similar interface as IShaderInput(Output)
+// which describes an arbitrary stage, 
+// array of these is sent to an executor along with dependency graph
+// executor then submits array consequently
+// adding wait on timelined semaphores
+// for specified in dependency graph stages
+// and signals timelined semaphore with incremented value
+// while it seems as a good idea to even further generalize
+// the way workload is submited to gpu, right now
+// it is not necessary since
+// i have no idea what stages other than two presented here
+// and a fixed dispatch stage can possibly be used.
 }

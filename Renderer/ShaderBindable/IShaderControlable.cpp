@@ -2,14 +2,16 @@
 
 namespace Renderer::ShaderBindable {
 
-void IShaderControlable::recordInit(vk::CommandBuffer) {}
+void IShaderInput::recordInit(vk::CommandBuffer cmd) {}
 
-void IShaderControlable::recordLoadData(vk::CommandBuffer) {}
-void IShaderControlable::recordLoadDataDynamic(vk::CommandBuffer) {}
+void IShaderInput::recordRegular(vk::CommandBuffer cmd) {}
 
-void IShaderControlable::recordTransferResult(vk::CommandBuffer) {}
-void IShaderControlable::recordTransferResultDynamic(vk::CommandBuffer) {}
+void IShaderInput::recordDynamic(vk::CommandBuffer cmd) {}
 
-}
+void IShaderOutput::recordInit(vk::CommandBuffer cmd) {}
+
+void IShaderOutput::recordRegular(vk::CommandBuffer cmd) {}
+
+void IShaderOutput::recordDynamic(vk::CommandBuffer cmd) {}
 
 }

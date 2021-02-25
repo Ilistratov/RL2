@@ -6,6 +6,8 @@ namespace Renderer::ResourceHandler {
 
 class RenderTarget : public ImageBase {
 public:
+	RenderTarget() = default;
+
 	RenderTarget(
 		vk::Extent2D ext,
 		vk::Format fmt,
@@ -16,7 +18,7 @@ public:
 	vk::ImageMemoryBarrier genPreBlitBarrier();
 	
 	vk::ImageBlit genBlit();
-	void recordBlit(vk::CommandBuffer cb, ImageBase& dst);
+	void recordBlit(vk::CommandBuffer cb, ImageBase::Data dst);
 };
 
 }

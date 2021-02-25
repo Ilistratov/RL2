@@ -10,7 +10,7 @@
 
 namespace Renderer::ShaderBindable {
 
-class BindableStructuredBuffer : public Pipeline::IDescriptorBindable, public ShaderBindable::IShaderControlable {
+class StructuredBuffer : public Pipeline::IDescriptorBindable, public ShaderBindable::IShaderInput {
 	ResourceHandler::StructuredBuffer buff;
 	vk::ShaderStageFlags visibleStages;
 
@@ -22,15 +22,18 @@ class BindableStructuredBuffer : public Pipeline::IDescriptorBindable, public Sh
 
 public:
 	//TODO
-	BindableStructuredBuffer(const BindableStructuredBuffer&) = delete;
-	BindableStructuredBuffer& operator =(const BindableStructuredBuffer&) = delete;
+	StructuredBuffer(const StructuredBuffer&) = delete;
+	StructuredBuffer& operator =(const StructuredBuffer&) = delete;
 
-	BindableStructuredBuffer(ResourceHandler::StructuredBuffer&& buff, vk::ShaderStageFlags visibleStages = vk::ShaderStageFlagBits::eAll);
+	StructuredBuffer(
+		ResourceHandler::StructuredBuffer&& buff,
+		vk::ShaderStageFlags visibleStages = vk::ShaderStageFlagBits::eAll
+	);
 
-	BindableStructuredBuffer(BindableStructuredBuffer&& other);
-	void operator =(BindableStructuredBuffer&& other);
+	StructuredBuffer(StructuredBuffer&& other);
+	void operator =(StructuredBuffer&& other);
 
-	void swap(BindableStructuredBuffer& other);
+	void swap(StructuredBuffer& other);
 	
 	//not thread safe
 	void free();
@@ -38,9 +41,9 @@ public:
 	//if there was no srcCopy assigned before, returns nullptr
 	//otherwise, will return ownership of previously assigned srcCopy.
 	STGUPtr&& swapCopySrcStgBuff(STGUPtr&& n_srcCopy, std::vector<ResourceHandler::StructuredBufferCopy>&& n_copyRegions = {});
-	Pipeline::DescriptorBinding getBinding() const;
+	Pipeline::DescriptorBinding getBinding() const override;
 
-	void recordLoadDataDynamic(vk::CommandBuffer cmd) override;
+	void recordDynamic(vk::CommandBuffer cmd) override;
 };
 
 }

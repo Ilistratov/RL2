@@ -59,6 +59,8 @@ public:
 	vk::ImageSubresourceLayers getSubresourceLayers() const;
 	vk::ImageSubresourceRange getSubresourceRange() const;
 
+	vk::ImageView createImageView();
+
 	~ImageBase();
 protected:
 	Data data;

@@ -32,11 +32,11 @@ vk::ImageBlit RenderTarget::genBlit() {
 	};
 }
 
-void RenderTarget::recordBlit(vk::CommandBuffer cb, ImageBase& dst) {
+void RenderTarget::recordBlit(vk::CommandBuffer cb, ImageBase::Data dst) {
 	cb.blitImage(
-		getData().img,
+		dst.img,
 		vk::ImageLayout::eTransferSrcOptimal,
-		dst.getData().img,
+		getData().img,
 		vk::ImageLayout::eTransferDstOptimal,
 		genBlit(),
 		vk::Filter::eLinear
