@@ -6,11 +6,11 @@
 #include "Renderer\PipelineHandler\DescriptorBinding.h"
 #include "Renderer\ResourceHandler\StructuredBuffer.h"
 #include "Renderer\ResourceHandler\StagingBuffer.h"
-#include "Renderer\ShaderBindable\IShaderControlable.h"
+#include "Renderer\ICmdRecorder.h"
 
 namespace Renderer::ShaderBindable {
 
-class StructuredBuffer : public Pipeline::IDescriptorBindable, public ShaderBindable::IShaderInput {
+class StructuredBuffer : public Pipeline::IDescriptorBindable, public ICmdRecorder {
 	ResourceHandler::StructuredBuffer buff;
 	vk::ShaderStageFlags visibleStages;
 

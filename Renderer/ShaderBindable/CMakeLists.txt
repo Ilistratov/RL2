@@ -1,8 +1,6 @@
 cmake_minimum_required (VERSION 3.8)
 
 set(SRCS 
-	IShaderControlable.h
-	IShaderControlable.cpp
 	StructuredBuffer.cpp
 	StructuredBuffer.h
 	RenderTarget.cpp

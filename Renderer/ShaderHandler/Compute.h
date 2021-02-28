@@ -22,7 +22,7 @@ public:
 
 	Compute(
 		const std::vector<Pipeline::SetBindable>& bnd,
-		const ShaderBindable::CompositePushContant& pushConstants,
+		ShaderBindable::PushConstantController& pcController,
 		const std::string& shaderFilePath,
 		const std::string& shaderMain,
 		std::tuple<int, int, int> dispatchDim
@@ -31,7 +31,7 @@ public:
 	Compute(Compute&& other);
 	void operator =(Compute&& other);
 
-	void dispatch();
+	void recordRegular(vk::CommandBuffer cmd) override;
 
 	void swap(Compute& other);
 	void free();

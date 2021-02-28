@@ -2,11 +2,11 @@
 
 #include "Renderer\PipelineHandler\DescriptorBinding.h"
 #include "Renderer\ResourceHandler\RenderTarget.h"
-#include "IShaderControlable.h"
+#include "Renderer\ICmdRecorder.h"
 
 namespace Renderer::ShaderBindable {
 
-class RenderTarget : public Pipeline::IDescriptorBindable, public IShaderOutput {
+class RenderTarget : public Pipeline::IDescriptorBindable, public ICmdRecorder {
 	ResourceHandler::ImageBase::Data blitDst;
 	ResourceHandler::RenderTarget renderTarget;
 	vk::ImageView imgView;
