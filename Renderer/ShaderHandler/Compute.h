@@ -4,6 +4,7 @@
 #include "Renderer\ResourceHandler\CommandPool.h"
 #include "Renderer\ShaderBindable\IShaderControlable.h"
 
+/*
 namespace Renderer::ShaderHandler {
 
 //access must by
@@ -65,3 +66,4 @@ public:
 };
 
 }
+*/

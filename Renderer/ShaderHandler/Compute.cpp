@@ -1,8 +1,14 @@
 #include <future>
 #include "Compute.h"
 
-namespace Renderer::ShaderHandler {
+/*
+TODO: as now task of work submission has been transfered to separate class,
+need to rewrite ShaderHandler::Compute to free it from this task.
+Also existing ShaderBindable's should now be derived from ICmdRecorder instead of IShaderInput(Output).
+*/
 
+/*
+namespace Renderer::ShaderHandler {
 vk::CommandBuffer Compute::recordInit() {
 	vk::CommandBuffer initCB = cmdPool.reserveOneTimeSubmit();
 	
@@ -308,5 +314,5 @@ void Compute::dispatch() {
 Compute::~Compute() {
 	free();
 }
-
 }
+*/

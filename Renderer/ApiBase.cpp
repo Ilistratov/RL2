@@ -375,7 +375,7 @@ ApiBase::ApiBase() {
 	createWindow({ 1280, 768 });
 	createInstance({}, {});
 	createSurface();
-	createDevice({ VK_KHR_SWAPCHAIN_EXTENSION_NAME }, {}, vk::QueueFlagBits::eGraphics | vk::QueueFlagBits::eCompute);
+	createDevice({ VK_KHR_SWAPCHAIN_EXTENSION_NAME, VK_KHR_TIMELINE_SEMAPHORE_EXTENSION_NAME }, {}, vk::QueueFlagBits::eGraphics | vk::QueueFlagBits::eCompute);
 	obtainQueues();
 }
 

@@ -39,7 +39,7 @@ void StructuredBuffer::free() {
 
 StructuredBuffer::STGUPtr&& StructuredBuffer::swapCopySrcStgBuff(
 	STGUPtr&& n_srcCopy,
-	std::vector<ResourceHandler::StructuredBufferCopy>&& n_copyRegions = {}
+	std::vector<ResourceHandler::StructuredBufferCopy>&& n_copyRegions
 ) {
 	std::scoped_lock lock(srcCopyAccess);
 	std::swap(srcCopy, n_srcCopy);

@@ -12,6 +12,10 @@ set(SRCS
 	Core.cpp
 	Swapchain.h
 	Swapchain.cpp
+	ICmdRecorder.h
+	ICmdRecorder.cpp
+	CmdExecutor.h
+	CmdExecutor.cpp
 )
 
 add_library(Renderer ${SRCS})
