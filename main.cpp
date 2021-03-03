@@ -2,6 +2,9 @@
 #include <chrono>
 #include <thread>
 #include "Renderer\Core.h"
+#include "Renderer\CmdExecutor.h"
+#include "Renderer\ShaderBindable\StructuredBuffer.h"
+#include "Renderer\CmdExecutor.h"
 
 //#pragma warning(push, 0)
 //#include <vulkan\vulkan.hpp>
@@ -54,7 +57,9 @@
 //}
 
 int main(int argc, char* argv[]) {
-	Renderer::core.init();
+	//TODO
+	//try to copy data to the gpu, using structured buffer, staging buffer, CmdExecutor
+
 	//Renderer::Pipeline::DSetLayoutFactory lf;
 	//Renderer::ResourceHandler::StructuredBuffer sb;
 	return 0;

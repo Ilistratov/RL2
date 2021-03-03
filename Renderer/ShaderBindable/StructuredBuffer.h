@@ -18,7 +18,8 @@ class StructuredBuffer : public Pipeline::IDescriptorBindable, public ICmdRecord
 	using STGUPtr = std::unique_ptr<ResourceHandler::StagingBuffer>;
 	STGUPtr srcCopy;
 	std::vector<ResourceHandler::StructuredBufferCopy> copyRegions;
-	bool isSrcPendingCopy = false;
+	STGUPtr srcCopyInProgress;
+	std::vector<STGUPtr> srcCopyDone;
 
 public:
 	//TODO
@@ -38,9 +39,8 @@ public:
 	//not thread safe
 	void free();
 
-	//if there was no srcCopy assigned before, returns nullptr
-	//otherwise, will return ownership of previously assigned srcCopy.
-	STGUPtr&& swapCopySrcStgBuff(STGUPtr&& n_srcCopy, std::vector<ResourceHandler::StructuredBufferCopy>&& n_copyRegions = {});
+	void pendCopy(STGUPtr&& n_srcCopy, std::vector<ResourceHandler::StructuredBufferCopy>&& n_copyRegions = {});
+	STGUPtr&& retriveUsedStg();
 	Pipeline::DescriptorBinding getBinding() const override;
 
 	void recordDynamic(vk::CommandBuffer cmd) override;

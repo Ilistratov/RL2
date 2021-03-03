@@ -18,11 +18,15 @@ void StructuredBuffer::operator=(StructuredBuffer&& other) {
 
 void StructuredBuffer::swap(StructuredBuffer& other) {
 	std::scoped_lock lock(srcCopyAccess, other.srcCopyAccess);
+	
 	buff.swap(other.buff);
 	std::swap(visibleStages, other.visibleStages);
+	
 	srcCopy.swap(other.srcCopy);
+	srcCopyInProgress.swap(other.srcCopyInProgress);
+	srcCopyDone.swap(other.srcCopyDone);
+
 	copyRegions.swap(other.copyRegions);
-	std::swap(isSrcPendingCopy, other.isSrcPendingCopy);
 }
 
 void StructuredBuffer::free() {
@@ -30,21 +34,31 @@ void StructuredBuffer::free() {
 	visibleStages = vk::ShaderStageFlags{};
 	
 	srcCopy.reset();
+	srcCopyInProgress.reset();
+	
+	srcCopyDone.clear();
+	srcCopyDone.shrink_to_fit();
 	
 	copyRegions.clear();
 	copyRegions.shrink_to_fit();
-	
-	isSrcPendingCopy = false;
 }
 
-StructuredBuffer::STGUPtr&& StructuredBuffer::swapCopySrcStgBuff(
-	STGUPtr&& n_srcCopy,
-	std::vector<ResourceHandler::StructuredBufferCopy>&& n_copyRegions
-) {
+void StructuredBuffer::pendCopy(STGUPtr&& n_srcCopy, std::vector<ResourceHandler::StructuredBufferCopy>&& n_copyRegions) {
 	std::scoped_lock lock(srcCopyAccess);
 	std::swap(srcCopy, n_srcCopy);
-	isSrcPendingCopy = true;
-	return std::move(srcCopy);
+}
+
+StructuredBuffer::STGUPtr&& StructuredBuffer::retriveUsedStg() {
+	std::scoped_lock lock(srcCopyAccess);
+
+	if (srcCopyDone.empty()) {
+		return nullptr;
+	}
+
+	STGUPtr res = std::move(srcCopyDone.back());
+	srcCopyDone.pop_back();
+	
+	return std::move(res);
 }
 
 Pipeline::DescriptorBinding StructuredBuffer::getBinding() const {
@@ -59,7 +73,11 @@ Pipeline::DescriptorBinding StructuredBuffer::getBinding() const {
 void StructuredBuffer::recordDynamic(vk::CommandBuffer cmd) {
 	std::scoped_lock lock(srcCopyAccess);
 	
-	if (isSrcPendingCopy) {
+	if (srcCopyInProgress.get() != nullptr) {
+		srcCopyDone.push_back(std::move(srcCopyInProgress));
+	}
+
+	if (srcCopy.get() != nullptr) {
 		srcCopy->recordCopyTo(cmd, buff, buff.toBufferCopy(copyRegions));
 		cmd.pipelineBarrier(
 			vk::PipelineStageFlagBits::eTransfer,
@@ -72,8 +90,7 @@ void StructuredBuffer::recordDynamic(vk::CommandBuffer cmd) {
 		
 		copyRegions.clear();
 		copyRegions.shrink_to_fit();
-		
-		isSrcPendingCopy = false;
+		srcCopyInProgress = std::move(srcCopy);
 	}
 }
 
