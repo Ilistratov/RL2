@@ -1,4 +1,5 @@
 #include "CommandPool.h"
+#include "Utill\Logger.h"
 
 namespace Renderer::ResourceHandler {
 
@@ -25,13 +26,20 @@ void CommandPool::swap(CommandPool& other) {
 }
 
 void CommandPool::free() {
-	core.device().freeCommandBuffers(data.pool, data.cmd);
+	GlobalLog.debugMsg("Enter: CommandPool::free");
+	
+	if (!data.cmd.empty()) {
+		core.device().freeCommandBuffers(data.pool, data.cmd);
+	}
+
 	core.device().destroyCommandPool(data.pool);
 
 	data.cmd.clear();
 	data.cmd.shrink_to_fit();
 
 	data.pool = vk::CommandPool{};
+
+	GlobalLog.debugMsg("Exit: CommandPool::free");
 }
 
 void CommandPool::reserve(uint32_t count) {
@@ -52,6 +60,8 @@ void CommandPool::reserve(uint32_t count) {
 }
 
 vk::CommandBuffer CommandPool::reserveOneTimeSubmit() {
+	GlobalLog.debugMsg("CommandPool::reserveOneTimeSubmit");
+	
 	return core.device().allocateCommandBuffers(
 		vk::CommandBufferAllocateInfo{
 			data.pool,
@@ -62,7 +72,11 @@ vk::CommandBuffer CommandPool::reserveOneTimeSubmit() {
 }
 
 void CommandPool::freeOneTimeSubmit(std::vector<vk::CommandBuffer> cmd) {
+	GlobalLog.debugMsg("Enter: CommandPool::freeOneTimeSubmit");
+	
 	core.device().freeCommandBuffers(data.pool, cmd);
+	
+	GlobalLog.debugMsg("Exit: CommandPool::freeOneTimeSubmit");
 }
 
 CommandPool::Data& CommandPool::getData() {
@@ -70,7 +84,11 @@ CommandPool::Data& CommandPool::getData() {
 }
 
 CommandPool::~CommandPool() {
+	GlobalLog.debugMsg("Enter: CommandPool::~CommandPool");
+	
 	free();
+	
+	GlobalLog.debugMsg("Exit: CommandPool::~CommandPool");
 }
 
 }

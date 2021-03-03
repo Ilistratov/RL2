@@ -57,10 +57,21 @@
 //}
 
 int main(int argc, char* argv[]) {
-	//TODO
-	//try to copy data to the gpu, using structured buffer, staging buffer, CmdExecutor
+	Renderer::ShaderBindable::StructuredBuffer sb(std::move(Renderer::ResourceHandler::StructuredBuffer(5, 1)));
+	std::unique_ptr<Renderer::ResourceHandler::StagingBuffer> stg = std::make_unique<Renderer::ResourceHandler::StagingBuffer>(5);
+	std::vector<char> data(5, 'X');
+	stg->copyFrom(data);
+	sb.pendCopy(std::move(stg));
+	Renderer::CmdExecutor cmd{
+		std::vector<Renderer::ExecutionStageDescription>{
+			Renderer::ExecutionStageDescription{
+				&sb
+			}
+		}
+	};
 
-	//Renderer::Pipeline::DSetLayoutFactory lf;
-	//Renderer::ResourceHandler::StructuredBuffer sb;
+	cmd.submit();
+	cmd.submit();
+
 	return 0;
 }

@@ -25,6 +25,8 @@ class CmdExecutor {
 	std::vector<vk::Semaphore> stageFinished;
 	std::vector<uint64_t> stageFinishedWaitVal;
 
+	void waitStage(uint64_t stageInd);
+
 	void recordRegular(uint64_t stageInd);
 	void recordDynamic(uint64_t stageInd);
 	void submitStage(uint64_t stageInd);

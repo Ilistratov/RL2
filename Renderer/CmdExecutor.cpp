@@ -1,19 +1,11 @@
 #include "CmdExecutor.h"
+#include "Utill\Logger.h"
 
 namespace Renderer {
 
-void CmdExecutor::recordRegular(uint64_t stageInd) {
-	auto& cmd = cmdPool.getData().cmd[stageInd];
-	cmd.begin(
-		vk::CommandBufferBeginInfo{
-			vk::CommandBufferUsageFlagBits::eSimultaneousUse
-		}
-	);
-	stages[stageInd].recorder->recordRegular(cmd);
-	cmd.end();
-}
-
-void CmdExecutor::recordDynamic(uint64_t stageInd) {
+void CmdExecutor::waitStage(uint64_t stageInd) {
+	GlobalLog.debugMsg("Enter: CmdExecutor::waitStage, stage: " + std::to_string(stageInd));
+	
 	core.device().waitSemaphores(
 		vk::SemaphoreWaitInfo{
 			{},
@@ -22,6 +14,29 @@ void CmdExecutor::recordDynamic(uint64_t stageInd) {
 		},
 		UINT64_MAX
 	);
+	
+	GlobalLog.debugMsg("Exit: CmdExecutor::waitStage, stage: " + std::to_string(stageInd));
+}
+
+void CmdExecutor::recordRegular(uint64_t stageInd) {
+	GlobalLog.debugMsg("Enter: CmdExecutor::recordRegular, stage: " + std::to_string(stageInd));
+	
+	auto& cmd = cmdPool.getData().cmd[stageInd];
+	cmd.begin(
+		vk::CommandBufferBeginInfo{
+			vk::CommandBufferUsageFlagBits::eSimultaneousUse
+		}
+	);
+	stages[stageInd].recorder->recordRegular(cmd);
+	cmd.end();
+
+	GlobalLog.debugMsg("Exit: CmdExecutor::recordRegular, stage: " + std::to_string(stageInd));
+}
+
+void CmdExecutor::recordDynamic(uint64_t stageInd) {
+	GlobalLog.debugMsg("Enter: CmdExecutor::recordDynamic, stage: " + std::to_string(stageInd));
+	
+	waitStage(stageInd);
 
 	auto& cmd = cmdDynamic[stageInd];
 
@@ -33,9 +48,13 @@ void CmdExecutor::recordDynamic(uint64_t stageInd) {
 	);
 	stages[stageInd].recorder->recordDynamic(cmd);
 	cmd.end();
+
+	GlobalLog.debugMsg("Exit: CmdExecutor::recordDynamic, stage: " + std::to_string(stageInd));
 }
 
 void CmdExecutor::submitStage(uint64_t stageInd) {
+	GlobalLog.debugMsg("Enter: CmdExecutor::submitStage, stge: " + std::to_string(stageInd));
+	
 	recordDynamic(stageInd);
 	
 	std::vector<vk::Semaphore> wait;
@@ -85,6 +104,8 @@ void CmdExecutor::submitStage(uint64_t stageInd) {
 	submit.setPNext(&internalWaitInfo);
 
 	core.apiBase().computeQueue().submit(submit);
+
+	GlobalLog.debugMsg("Exit: CmdExecutor::submitStage, stge: " + std::to_string(stageInd));
 }
 
 CmdExecutor::CmdExecutor(
@@ -97,11 +118,19 @@ CmdExecutor::CmdExecutor(
 	cmdPool.reserve(stages.size());
 
 	vk::CommandBuffer cmdInit = cmdPool.reserveOneTimeSubmit();
+	
+	cmdInit.begin(
+		vk::CommandBufferBeginInfo{
+			vk::CommandBufferUsageFlagBits::eOneTimeSubmit
+		}
+	);
 
 	for (uint64_t i = 0; i < stages.size(); i++) {
 		stages[i].recorder->recordInit(cmdInit);
 	}
 
+	cmdInit.end();
+	
 	vk::Fence initFinished = core.device().createFence({});
 
 	core.apiBase().computeQueue().submit(
@@ -116,6 +145,7 @@ CmdExecutor::CmdExecutor(
 
 	core.device().waitForFences(initFinished, true, UINT64_MAX);
 	cmdPool.freeOneTimeSubmit({ cmdInit });
+	core.device().destroyFence(initFinished);
 
 	for (uint64_t i = 0; i < stages.size(); i++) {
 		recordRegular(i);
@@ -162,6 +192,11 @@ void CmdExecutor::swap(CmdExecutor& other) {
 }
 
 void CmdExecutor::free() {
+	GlobalLog.debugMsg("Enter: CmdExecutor::free");
+	for (uint64_t i = 0; i < stages.size(); i++) {
+		waitStage(i);
+	}
+
 	stages.clear();
 	stages.shrink_to_fit();
 
@@ -181,16 +216,26 @@ void CmdExecutor::free() {
 
 	stageFinishedWaitVal.clear();
 	stageFinishedWaitVal.shrink_to_fit();
+
+	GlobalLog.debugMsg("Exit: CmdExecutor::free");
 }
 
 void CmdExecutor::submit() {
+	GlobalLog.debugMsg("Enter: CmdExecutor::submit");
+	
 	for (uint64_t i = 0; i < stages.size(); i++) {
 		submitStage(i);
 	}
+
+	GlobalLog.debugMsg("Exit: CmdExecutor::submit");
 }
 
 CmdExecutor::~CmdExecutor() {
+	GlobalLog.debugMsg("Enter: CmdExecutor::~CmdExecutor");
+	
 	free();
+
+	GlobalLog.debugMsg("Exit: CmdExecutor::~CmdExecutor");
 }
 
 }

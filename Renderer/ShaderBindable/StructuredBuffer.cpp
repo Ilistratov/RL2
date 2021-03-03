@@ -5,7 +5,7 @@ namespace Renderer::ShaderBindable {
 StructuredBuffer::StructuredBuffer(
 	ResourceHandler::StructuredBuffer&& buff,
 	vk::ShaderStageFlags visibleStages
-) : buff(std::move(buff)), visibleStages(visibleStages), srcCopy(nullptr) {}
+) : buff(std::move(buff)), visibleStages(visibleStages) {}
 
 StructuredBuffer::StructuredBuffer(StructuredBuffer&& other) {
 	swap(other);

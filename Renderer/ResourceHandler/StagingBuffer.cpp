@@ -23,7 +23,8 @@ void StagingBuffer::copyFrom(void* src, uint64_t sz, uint64_t dstOffset) {
 
 void StagingBuffer::recordCopyTo(vk::CommandBuffer& cmd, BufferBase& dst, const std::vector<vk::BufferCopy>& copyRegions) {
 	if (copyRegions.empty()) {
-		cmd.copyBuffer(data.buff, dst.getData().buff, { 0, 0, std::min(data.sz, dst.getData().sz) });
+		cmd.copyBuffer(data.buff, dst.getData().buff, { {0, 0, std::min(data.sz, dst.getData().sz)} });
+		return;
 	}
 	
 	cmd.copyBuffer(data.buff, dst.getData().buff, copyRegions);

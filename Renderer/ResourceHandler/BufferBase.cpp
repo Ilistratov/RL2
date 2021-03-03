@@ -21,7 +21,7 @@ BufferBase::BufferBase(
 
 	auto mem_requierments = device.getBufferMemoryRequirements(data.buff);
 	
-	data.sz = mem_requierments.size;
+	data.sz = sz;
 	data.mem = device.allocateMemory(
 		vk::MemoryAllocateInfo{
 			mem_requierments.size,

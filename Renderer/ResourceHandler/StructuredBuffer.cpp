@@ -10,16 +10,15 @@ StructuredBuffer::StructuredBuffer(
 	uint64_t count,
 	uint64_t stride,
 	vk::BufferUsageFlagBits specificUsage
-) : count(count),
-	stride(stride) {
-	BufferBase::BufferBase(
-		stride * count,
+) : BufferBase::BufferBase(
+		stride* count,
 		vk::BufferUsageFlagBits::eStorageBuffer |
 		vk::BufferUsageFlagBits::eTransferDst |
 		specificUsage,
 		vk::MemoryPropertyFlagBits::eDeviceLocal
-	);
-}
+	),
+	count(count),
+	stride(stride) {}
 
 StructuredBuffer::StructuredBuffer(StructuredBuffer&& other) {
 	swap(other);
