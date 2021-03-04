@@ -1,3 +1,4 @@
+#include "Renderer\Core.h"
 #include "BufferBase.h"
 
 namespace Renderer::ResourceHandler {

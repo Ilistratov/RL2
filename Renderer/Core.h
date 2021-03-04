@@ -55,5 +55,6 @@ public:
 //safety/sanity sacrificed to convenience
 //for INTERNAL use ONLY
 extern RendererCore core;
+const uint64_t TIMEOUT_NSEC = 5'000'000'000ll; // 5 second
 
 }

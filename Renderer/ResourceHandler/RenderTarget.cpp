@@ -4,15 +4,13 @@ namespace Renderer::ResourceHandler {
 
 RenderTarget::RenderTarget(
 	vk::Extent2D ext,
-	vk::Format fmt,
-	vk::ImageLayout initialLayout
+	vk::Format fmt
 ) : ImageBase(
 	ext,
 	fmt,
 	vk::ImageUsageFlagBits::eStorage |
 	vk::ImageUsageFlagBits::eTransferSrc,
-	vk::MemoryPropertyFlagBits::eDeviceLocal,
-	initialLayout
+	vk::MemoryPropertyFlagBits::eDeviceLocal
 ) {}
 
 vk::ImageMemoryBarrier RenderTarget::genPreRenderBarrier() {
@@ -21,6 +19,16 @@ vk::ImageMemoryBarrier RenderTarget::genPreRenderBarrier() {
 
 vk::ImageMemoryBarrier RenderTarget::genPreBlitBarrier() {
 	return genTransferSrcBarrier(vk::ImageLayout::eGeneral);
+}
+
+vk::ImageMemoryBarrier RenderTarget::genInitBarrier() {
+	return genLayoutTransitionBarrier(
+		vk::ImageLayout::eUndefined,
+		vk::ImageLayout::eGeneral,
+		{},
+		vk::AccessFlagBits::eShaderRead |
+		vk::AccessFlagBits::eShaderWrite
+	);
 }
 
 vk::ImageBlit RenderTarget::genBlit() {
@@ -34,9 +42,9 @@ vk::ImageBlit RenderTarget::genBlit() {
 
 void RenderTarget::recordBlit(vk::CommandBuffer cb, ImageBase::Data dst) {
 	cb.blitImage(
-		dst.img,
-		vk::ImageLayout::eTransferSrcOptimal,
 		getData().img,
+		vk::ImageLayout::eTransferSrcOptimal,
+		dst.img,
 		vk::ImageLayout::eTransferDstOptimal,
 		genBlit(),
 		vk::Filter::eLinear

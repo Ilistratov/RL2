@@ -10,12 +10,12 @@ public:
 
 	RenderTarget(
 		vk::Extent2D ext,
-		vk::Format fmt,
-		vk::ImageLayout initialLayout = vk::ImageLayout::eGeneral
+		vk::Format fmt
 	);
 
 	vk::ImageMemoryBarrier genPreRenderBarrier();
 	vk::ImageMemoryBarrier genPreBlitBarrier();
+	vk::ImageMemoryBarrier genInitBarrier();
 	
 	vk::ImageBlit genBlit();
 	void recordBlit(vk::CommandBuffer cb, ImageBase::Data dst);

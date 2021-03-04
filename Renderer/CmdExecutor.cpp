@@ -1,19 +1,25 @@
+#include "Core.h"
 #include "CmdExecutor.h"
 #include "Utill\Logger.h"
+#include "Utill\UtillFunctions.h"
 
 namespace Renderer {
 
 void CmdExecutor::waitStage(uint64_t stageInd) {
 	GlobalLog.debugMsg("Enter: CmdExecutor::waitStage, stage: " + std::to_string(stageInd));
 	
-	core.device().waitSemaphores(
+	auto res = core.device().waitSemaphores(
 		vk::SemaphoreWaitInfo{
 			{},
-			stageFinished,
-			stageFinishedWaitVal
+			stageFinished[stageInd],
+			stageFinishedWaitVal[stageInd]
 		},
-		UINT64_MAX
+		TIMEOUT_NSEC
 	);
+
+	if (res != vk::Result::eSuccess) {
+		throw std::runtime_error(gen_err_str(__FILE__, __LINE__, "failed to wait for semaphore"));
+	}
 	
 	GlobalLog.debugMsg("Exit: CmdExecutor::waitStage, stage: " + std::to_string(stageInd));
 }
@@ -75,17 +81,21 @@ void CmdExecutor::submitStage(uint64_t stageInd) {
 		//stage, thar was submited for execution on previous iteration
 		//and it just turns out, that their stageFinishedWaitVal is
 		//also the one we need
-		wait.push_back(stageFinished[stageInd]);
+		wait.push_back(stageFinished[waitInd]);
 		internalWaitValues.push_back(stageFinishedWaitVal[waitInd]);
 	}
 	wait.insert(wait.end(), stages[stageInd].externalWait.begin(), stages[stageInd].externalWait.end());
+	internalWaitValues.resize(stages[stageInd].internalWait.size() + stages[stageInd].externalWait.size());
 	
 	waitStages.insert(waitStages.end(), stages[stageInd].internalWaitStage.begin(), stages[stageInd].internalWaitStage.end());
 	waitStages.insert(waitStages.end(), stages[stageInd].externalWaitStage.begin(), stages[stageInd].externalWaitStage.end());
 
+	std::vector<uint64_t> signalValues(1 + stages[stageInd].externalSignal.size());
+	signalValues[0] = ++stageFinishedWaitVal[stageInd];
+
 	vk::TimelineSemaphoreSubmitInfo internalWaitInfo{
 		internalWaitValues,
-		++stageFinishedWaitVal[stageInd]
+		signalValues
 	};
 
 	std::vector<vk::Semaphore> signal;
@@ -143,7 +153,7 @@ CmdExecutor::CmdExecutor(
 		initFinished
 	);
 
-	core.device().waitForFences(initFinished, true, UINT64_MAX);
+	core.device().waitForFences(initFinished, true, TIMEOUT_NSEC);
 	cmdPool.freeOneTimeSubmit({ cmdInit });
 	core.device().destroyFence(initFinished);
 
@@ -182,6 +192,8 @@ void CmdExecutor::operator=(CmdExecutor&& other) {
 }
 
 void CmdExecutor::swap(CmdExecutor& other) {
+	GlobalLog.debugMsg("Enter: CmdExecutor::swap");
+
 	stages.swap(other.stages);
 	
 	cmdPool.swap(other.cmdPool);
@@ -189,6 +201,8 @@ void CmdExecutor::swap(CmdExecutor& other) {
 
 	stageFinished.swap(other.stageFinished);
 	stageFinishedWaitVal.swap(other.stageFinishedWaitVal);
+
+	GlobalLog.debugMsg("Exit: CmdExecutor::swap");
 }
 
 void CmdExecutor::free() {

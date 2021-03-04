@@ -4,6 +4,8 @@
 #include <vulkan\vulkan.hpp>
 #pragma warning(pop)
 
+#include "ResourceHandler\ImageBase.h"
+
 namespace Renderer {
 //TODO
 //finish swapchain
@@ -30,6 +32,14 @@ public:
 
 	SwapchainHndl() = default;
 	void init();
+
+	vk::ImageMemoryBarrier genInit(uint32_t ind);
+	vk::ImageMemoryBarrier genPreBlit(uint32_t ind);
+	vk::ImageMemoryBarrier genPostBlit(uint32_t ind);
+	//get ImageBase::Data based on swapchain image
+	//returned value won't contain valid size and mem,
+	//since it is inaccessible anyway
+	ResourceHandler::ImageBase::Data getImageData(uint32_t ind);
 
 	uint32_t activeImage() const noexcept;
 	vk::Semaphore imageAvaliable() const noexcept;

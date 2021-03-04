@@ -2,8 +2,8 @@
 
 #include <map>
 
-#include <SDL2\SDL.h>
-#include <SDL2\SDL_vulkan.h>
+#define GLFW_INCLUDE_VULKAN
+#include <GLFW\glfw3.h>
 
 #pragma warning(push, 0)
 #include <vulkan\vulkan.hpp>
@@ -23,7 +23,7 @@ class ApiBase {
 
 	std::map<uint32_t, vk::Queue> deviceQueues;
 
-	SDL_Window* wnd;
+	GLFWwindow* wnd;
 	vk::SurfaceKHR srf;
 	vk::UniqueDebugUtilsMessengerEXT dbgUtlMsgr;
 
@@ -64,7 +64,7 @@ public:
 	vk::Queue graphicsQueue() const;
 	vk::Queue presentQueue() const;
 
-	SDL_Window* window() const noexcept;
+	GLFWwindow* window() const noexcept;
 	vk::SurfaceKHR surface() const noexcept;
 
 	uint32_t findMemoryTypeIndex(

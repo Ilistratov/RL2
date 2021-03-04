@@ -1,3 +1,4 @@
+#include "Renderer\Core.h"
 #include "ImageBase.h"
 
 namespace Renderer::ResourceHandler {

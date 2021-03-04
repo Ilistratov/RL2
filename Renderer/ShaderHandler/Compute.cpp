@@ -1,4 +1,5 @@
 #include <future>
+#include "Renderer\Core.h"
 #include "Compute.h"
 
 /*
@@ -26,12 +27,7 @@ Compute::Compute(
 	);
 
 	pcController.bindLayout(pipeline.getData().layt);
-
-	auto initFinished = core.device().createFence(
-		vk::FenceCreateInfo{
-			vk::FenceCreateFlagBits::eSignaled
-		}
-	);
+	pcController.bindPipeline(pipeline.getData().ppln);
 }
 
 Compute::Compute(Compute&& other) {

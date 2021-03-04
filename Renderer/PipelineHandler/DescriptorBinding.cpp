@@ -39,6 +39,7 @@ vk::DescriptorSetLayoutBinding DescriptorBinding::getLayoutBinding() const {
 	return vk::DescriptorSetLayoutBinding{
 		bindingId,
 		type,
+		getCount(),
 		stage,
 		{} //unused as yet to be understood
 	};

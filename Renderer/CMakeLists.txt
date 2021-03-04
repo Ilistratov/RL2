@@ -39,5 +39,4 @@ target_link_directories(Renderer PUBLIC ${PROJECT_SOURCE_DIR}/Third-party/lib-x6
 target_link_directories(Renderer PUBLIC $ENV{VULKAN_SDK}/Lib)
 
 target_link_libraries(Renderer vulkan-1)
-target_link_libraries(Renderer SDL2)
-target_link_libraries(Renderer SDL2main)
+target_link_libraries(Renderer glfw3)

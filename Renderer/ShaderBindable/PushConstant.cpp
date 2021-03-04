@@ -1,3 +1,4 @@
+#include "Renderer\Core.h"
 #include "PushConstant.h"
 
 namespace Renderer::ShaderBindable {
@@ -12,16 +13,25 @@ PushConstantController::PushConstantController(std::vector<IPushConstant*> pushC
 }
 
 void PushConstantController::recordDynamic(vk::CommandBuffer cmd) {
+	cmd.bindPipeline(vk::PipelineBindPoint::eCompute, boundPpln);
 	for (auto pc : pushConstants) {
 		pc->recordPush(cmd, boundLayt);
 	}
+}
+
+void PushConstantController::recordInit(vk::CommandBuffer cmd) {
+	recordDynamic(cmd);
 }
 
 void PushConstantController::bindLayout(vk::PipelineLayout layt) {
 	boundLayt = layt;
 }
 
-std::vector<vk::PushConstantRange>&& PushConstantController::getPCR() {
+void PushConstantController::bindPipeline(vk::Pipeline ppln) {
+	boundPpln = ppln;
+}
+
+std::vector<vk::PushConstantRange> PushConstantController::getPCR() {
 	std::vector<vk::PushConstantRange> res;
 	res.reserve(pushConstants.size());
 
@@ -29,7 +39,7 @@ std::vector<vk::PushConstantRange>&& PushConstantController::getPCR() {
 		res.push_back(pc->getPCR());
 	}
 
-	return std::move(res);
+	return res;
 }
 
 }

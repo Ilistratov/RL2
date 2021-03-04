@@ -88,6 +88,73 @@ vk::Format SwapchainHndl::format() const noexcept {
 	return fmt;
 }
 
+vk::ImageMemoryBarrier SwapchainHndl::genInit(uint32_t ind) {
+	return vk::ImageMemoryBarrier{
+		{},
+		{},
+		vk::ImageLayout::eUndefined,
+		vk::ImageLayout::ePresentSrcKHR,
+		{VK_QUEUE_FAMILY_IGNORED},
+		{VK_QUEUE_FAMILY_IGNORED},
+		imgs[ind],
+		vk::ImageSubresourceRange{
+			vk::ImageAspectFlagBits::eColor,
+			0,
+			1,
+			0,
+			1
+		}
+	};
+}
+
+vk::ImageMemoryBarrier SwapchainHndl::genPreBlit(uint32_t ind) {
+	return vk::ImageMemoryBarrier{
+		{},
+		vk::AccessFlagBits::eTransferWrite,
+		vk::ImageLayout::ePresentSrcKHR,
+		vk::ImageLayout::eTransferDstOptimal,
+		{VK_QUEUE_FAMILY_IGNORED},
+		{VK_QUEUE_FAMILY_IGNORED},
+		imgs[ind],
+		vk::ImageSubresourceRange{
+			vk::ImageAspectFlagBits::eColor,
+			0,
+			1,
+			0,
+			1
+		}
+	};
+}
+
+vk::ImageMemoryBarrier SwapchainHndl::genPostBlit(uint32_t ind) {
+	return vk::ImageMemoryBarrier{
+		vk::AccessFlagBits::eTransferWrite,
+		{},
+		vk::ImageLayout::eTransferDstOptimal,
+		vk::ImageLayout::ePresentSrcKHR,
+		{VK_QUEUE_FAMILY_IGNORED},
+		{VK_QUEUE_FAMILY_IGNORED},
+		imgs[ind],
+		vk::ImageSubresourceRange{
+			vk::ImageAspectFlagBits::eColor,
+			0,
+			1,
+			0,
+			1
+		}
+	};
+}
+
+ResourceHandler::ImageBase::Data SwapchainHndl::getImageData(uint32_t ind) {
+	return ResourceHandler::ImageBase::Data{
+		{},
+		imgs[ind],
+		0,
+		ext,
+		fmt
+	};
+}
+
 uint32_t SwapchainHndl::activeImage() const noexcept {
 	return activeImageInd;
 }
@@ -106,7 +173,7 @@ bool SwapchainHndl::acquireNextImage() {
 		return true;
 	}
 
-	auto res = core.apiBase().device().acquireNextImageKHR(swpch, UINT64_MAX, imgAvaliable, {}, &activeImageInd);
+	auto res = core.apiBase().device().acquireNextImageKHR(swpch, TIMEOUT_NSEC, imgAvaliable, {}, &activeImageInd);
 
 	if (res == vk::Result::eSuccess) {
 		return true;

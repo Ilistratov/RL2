@@ -1,6 +1,8 @@
 #pragma once
 
-#include "Renderer\Core.h"
+#pragma warning(push, 0)
+#include <vulkan\vulkan.hpp>
+#pragma warning(pop)
 
 namespace Renderer::ResourceHandler {
 

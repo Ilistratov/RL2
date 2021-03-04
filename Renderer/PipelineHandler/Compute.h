@@ -6,7 +6,6 @@
 #include <vulkan\vulkan.hpp>
 #pragma warning(pop)
 
-#include "Renderer\Core.h"
 #include "DPoolHandler.h"
 
 namespace Renderer::Pipeline {

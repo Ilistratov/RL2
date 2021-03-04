@@ -1,3 +1,4 @@
+#include "Renderer\Core.h"
 #include "Compute.h"
 #include "LoadShaderModule.h"
 

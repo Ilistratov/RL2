@@ -1,5 +1,7 @@
 #include <algorithm>
 #include <cassert>
+
+#include "Renderer\Core.h"
 #include "DPoolHandler.h"
 
 namespace Renderer::Pipeline {

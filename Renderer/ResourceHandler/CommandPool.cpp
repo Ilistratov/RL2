@@ -1,3 +1,4 @@
+#include "Renderer\Core.h"
 #include "CommandPool.h"
 #include "Utill\Logger.h"
 
@@ -74,7 +75,9 @@ vk::CommandBuffer CommandPool::reserveOneTimeSubmit() {
 void CommandPool::freeOneTimeSubmit(std::vector<vk::CommandBuffer> cmd) {
 	GlobalLog.debugMsg("Enter: CommandPool::freeOneTimeSubmit");
 	
-	core.device().freeCommandBuffers(data.pool, cmd);
+	if (!cmd.empty()) {
+		core.device().freeCommandBuffers(data.pool, cmd);
+	}
 	
 	GlobalLog.debugMsg("Exit: CommandPool::freeOneTimeSubmit");
 }

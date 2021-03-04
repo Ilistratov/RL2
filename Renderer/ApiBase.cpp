@@ -65,12 +65,14 @@ void ApiBase::createInstance(
 #endif // !NDEBUG
 
 	{
-		uint32_t ext_cnt = 0;
-		SDL_Vulkan_GetInstanceExtensions(wnd, &ext_cnt, nullptr);
-		std::vector<const char*> ext_names(ext_cnt);
-		SDL_Vulkan_GetInstanceExtensions(wnd, &ext_cnt, ext_names.data());
+		uint32_t glfw_ext_cnt = 0;
+		auto glfw_ext_names_ptr = glfwGetRequiredInstanceExtensions(&glfw_ext_cnt);
 
-		instanceExt.insert(instanceExt.end(), ext_names.begin(), ext_names.end());
+		for (uint32_t i = 0; i < glfw_ext_cnt; i++) {
+			if (!std::count(instanceExt.begin(), instanceExt.end(), glfw_ext_names_ptr[i])) {
+				instanceExt.push_back(glfw_ext_names_ptr[i]);
+			}
+		}
 	}
 
 	instance_ci.enabledExtensionCount = (uint32_t)instanceExt.size();
@@ -132,15 +134,15 @@ void ApiBase::createInstance(
 	GlobalLog.infoMsg("Created Instance");
 }
 
-void ApiBase::createWindow(
-	vk::Extent2D extent) {
+void ApiBase::createWindow(vk::Extent2D extent) {
+	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
-
-	wnd = SDL_CreateWindow(
+	wnd = glfwCreateWindow(
+		extent.width,
+		extent.height,
 		"RL2_WND_Name_Configure_TBD",
-		SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-		extent.width, extent.height,
-		SDL_WINDOW_VULKAN | SDL_WINDOW_SHOWN
+		nullptr, nullptr
 	);
 
 	if (!wnd) {
@@ -153,9 +155,9 @@ void ApiBase::createWindow(
 void ApiBase::createSurface() {
 	VkSurfaceKHR srf_raw = VK_NULL_HANDLE;
 
-	if (!SDL_Vulkan_CreateSurface(wnd, inst.get(), &srf_raw)) {
-		throw std::runtime_error(gen_err_str(__FILE__, __LINE__, "Failed to create window surface"));
-	}
+	auto res = glfwCreateWindowSurface(inst.get(), wnd, nullptr, &srf_raw);
+
+	assert(("Failed to create window surface", res == VK_SUCCESS));
 
 	srf = vk::SurfaceKHR(srf_raw);
 
@@ -368,8 +370,8 @@ void ApiBase::obtainQueues() {
 }
 
 ApiBase::ApiBase() {
-	if (SDL_Init(SDL_INIT_EVENTS | SDL_INIT_VIDEO)) {
-		throw std::runtime_error(gen_err_str(__FILE__, __LINE__, "Failed to SDL_Init()"));
+	if (!glfwInit()) {
+		throw std::runtime_error(gen_err_str(__FILE__, __LINE__, "Failed to glfwInit()"));
 	}
 
 	createWindow({ 1280, 768 });
@@ -417,7 +419,7 @@ vk::Queue ApiBase::presentQueue() const {
 	return deviceQueues.at(prntQInd);
 }
 
-SDL_Window* ApiBase::window() const noexcept {
+GLFWwindow* ApiBase::window() const noexcept {
 	return wnd;
 }
 
@@ -440,8 +442,8 @@ uint32_t ApiBase::findMemoryTypeIndex(uint32_t typeBits, vk::MemoryPropertyFlags
 ApiBase::~ApiBase() {
 	dvc.get().waitIdle();
 	inst.get().destroySurfaceKHR(srf);
-	SDL_DestroyWindow(wnd);
-	SDL_Quit();
+	glfwDestroyWindow(wnd);
+	glfwTerminate();
 }
 
 }

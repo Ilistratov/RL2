@@ -2,7 +2,6 @@
 
 #include <vector>
 
-#include "Renderer\Core.h"
 #include "DescriptorBinding.h"
 
 namespace Renderer::Pipeline {

@@ -1,4 +1,5 @@
 #include "StagingBuffer.h"
+#include "Renderer\Core.h"
 
 namespace Renderer::ResourceHandler {
 
