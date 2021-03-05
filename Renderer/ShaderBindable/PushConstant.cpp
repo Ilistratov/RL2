@@ -13,7 +13,7 @@ PushConstantController::PushConstantController(std::vector<IPushConstant*> pushC
 }
 
 void PushConstantController::recordDynamic(vk::CommandBuffer cmd) {
-	cmd.bindPipeline(vk::PipelineBindPoint::eCompute, boundPpln);
+	//cmd.bindPipeline(vk::PipelineBindPoint::eCompute, boundPpln);
 	for (auto pc : pushConstants) {
 		pc->recordPush(cmd, boundLayt);
 	}

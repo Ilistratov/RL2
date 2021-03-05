@@ -12,6 +12,7 @@ namespace Renderer::ShaderHandler {
 class Compute : public ICmdRecorder {
 	Pipeline::DPoolHandler dPool;
 	Pipeline::Compute pipeline;
+	ShaderBindable::PushConstantController pcc;
 	
 	std::tuple<int, int, int> dispatchDim = { 0, 0, 0 };
 public:
@@ -22,7 +23,7 @@ public:
 
 	Compute(
 		const std::vector<Pipeline::SetBindable>& bnd,
-		ShaderBindable::PushConstantController& pcController,
+		const std::vector<ShaderBindable::IPushConstant*>& pc,
 		const std::string& shaderFilePath,
 		const std::string& shaderMain,
 		std::tuple<int, int, int> dispatchDim
@@ -31,7 +32,7 @@ public:
 	Compute(Compute&& other);
 	void operator =(Compute&& other);
 
-	void recordRegular(vk::CommandBuffer cmd) override;
+	void recordDynamic(vk::CommandBuffer cmd) override;
 
 	void swap(Compute& other);
 	void free();

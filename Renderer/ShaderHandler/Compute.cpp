@@ -12,22 +12,22 @@ namespace Renderer::ShaderHandler {
 
 Compute::Compute(
 	const std::vector<Pipeline::SetBindable>& bnd,
-	ShaderBindable::PushConstantController& pcController,
+	const std::vector<ShaderBindable::IPushConstant*>& pc,
 	const std::string& shaderFilePath,
 	const std::string& shaderMain,
 	std::tuple<int, int, int> dispatchDim
-) : dispatchDim(dispatchDim) {
+) : dispatchDim(dispatchDim), pcc(pc) {
 	dPool = Pipeline::DPoolHandler(bnd);
 	
 	pipeline = Pipeline::Compute(
 		dPool,
-		pcController.getPCR(),
+		pcc.getPCR(),
 		shaderFilePath,
 		shaderMain
 	);
 
-	pcController.bindLayout(pipeline.getData().layt);
-	pcController.bindPipeline(pipeline.getData().ppln);
+	pcc.bindLayout(pipeline.getData().layt);
+	pcc.bindPipeline(pipeline.getData().ppln);
 }
 
 Compute::Compute(Compute&& other) {
@@ -43,7 +43,8 @@ void Compute::operator =(Compute&& other) {
 	other.free();
 }
 
-void Compute::recordRegular(vk::CommandBuffer cmd) {
+void Compute::recordDynamic(vk::CommandBuffer cmd) {
+	pcc.recordDynamic(cmd);
 	cmd.bindPipeline(vk::PipelineBindPoint::eCompute, pipeline.getData().ppln);
 	cmd.bindDescriptorSets(vk::PipelineBindPoint::eCompute, pipeline.getData().layt, 0, dPool.getData().sets, {});
 	auto [x, y, z] = dispatchDim;
@@ -53,6 +54,7 @@ void Compute::recordRegular(vk::CommandBuffer cmd) {
 void Compute::swap(Compute& other) {
 	dPool.swap(other.dPool);
 	pipeline.swap(other.pipeline);
+	std::swap(pcc, other.pcc);
 	
 	std::swap(dispatchDim, other.dispatchDim);
 }

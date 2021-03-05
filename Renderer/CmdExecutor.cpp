@@ -1,12 +1,12 @@
 #include "Core.h"
 #include "CmdExecutor.h"
-#include "Utill\Logger.h"
+//#include "Utill\Logger.h"
 #include "Utill\UtillFunctions.h"
 
 namespace Renderer {
 
 void CmdExecutor::waitStage(uint64_t stageInd) {
-	GlobalLog.debugMsg("Enter: CmdExecutor::waitStage, stage: " + std::to_string(stageInd));
+	//GlobalLog.debugMsg("Enter: CmdExecutor::waitStage, stage: " + std::to_string(stageInd));
 	
 	auto res = core.device().waitSemaphores(
 		vk::SemaphoreWaitInfo{
@@ -21,11 +21,11 @@ void CmdExecutor::waitStage(uint64_t stageInd) {
 		throw std::runtime_error(gen_err_str(__FILE__, __LINE__, "failed to wait for semaphore"));
 	}
 	
-	GlobalLog.debugMsg("Exit: CmdExecutor::waitStage, stage: " + std::to_string(stageInd));
+	//GlobalLog.debugMsg("Exit: CmdExecutor::waitStage, stage: " + std::to_string(stageInd));
 }
 
 void CmdExecutor::recordRegular(uint64_t stageInd) {
-	GlobalLog.debugMsg("Enter: CmdExecutor::recordRegular, stage: " + std::to_string(stageInd));
+	//GlobalLog.debugMsg("Enter: CmdExecutor::recordRegular, stage: " + std::to_string(stageInd));
 	
 	auto& cmd = cmdPool.getData().cmd[stageInd];
 	cmd.begin(
@@ -36,11 +36,11 @@ void CmdExecutor::recordRegular(uint64_t stageInd) {
 	stages[stageInd].recorder->recordRegular(cmd);
 	cmd.end();
 
-	GlobalLog.debugMsg("Exit: CmdExecutor::recordRegular, stage: " + std::to_string(stageInd));
+	//GlobalLog.debugMsg("Exit: CmdExecutor::recordRegular, stage: " + std::to_string(stageInd));
 }
 
 void CmdExecutor::recordDynamic(uint64_t stageInd) {
-	GlobalLog.debugMsg("Enter: CmdExecutor::recordDynamic, stage: " + std::to_string(stageInd));
+	//GlobalLog.debugMsg("Enter: CmdExecutor::recordDynamic, stage: " + std::to_string(stageInd));
 	
 	waitStage(stageInd);
 
@@ -55,11 +55,11 @@ void CmdExecutor::recordDynamic(uint64_t stageInd) {
 	stages[stageInd].recorder->recordDynamic(cmd);
 	cmd.end();
 
-	GlobalLog.debugMsg("Exit: CmdExecutor::recordDynamic, stage: " + std::to_string(stageInd));
+	//GlobalLog.debugMsg("Exit: CmdExecutor::recordDynamic, stage: " + std::to_string(stageInd));
 }
 
 void CmdExecutor::submitStage(uint64_t stageInd) {
-	GlobalLog.debugMsg("Enter: CmdExecutor::submitStage, stge: " + std::to_string(stageInd));
+	//GlobalLog.debugMsg("Enter: CmdExecutor::submitStage, stge: " + std::to_string(stageInd));
 	
 	recordDynamic(stageInd);
 	
@@ -115,7 +115,7 @@ void CmdExecutor::submitStage(uint64_t stageInd) {
 
 	core.apiBase().computeQueue().submit(submit);
 
-	GlobalLog.debugMsg("Exit: CmdExecutor::submitStage, stge: " + std::to_string(stageInd));
+	//GlobalLog.debugMsg("Exit: CmdExecutor::submitStage, stge: " + std::to_string(stageInd));
 }
 
 CmdExecutor::CmdExecutor(
@@ -192,7 +192,7 @@ void CmdExecutor::operator=(CmdExecutor&& other) {
 }
 
 void CmdExecutor::swap(CmdExecutor& other) {
-	GlobalLog.debugMsg("Enter: CmdExecutor::swap");
+	//GlobalLog.debugMsg("Enter: CmdExecutor::swap");
 
 	stages.swap(other.stages);
 	
@@ -202,11 +202,11 @@ void CmdExecutor::swap(CmdExecutor& other) {
 	stageFinished.swap(other.stageFinished);
 	stageFinishedWaitVal.swap(other.stageFinishedWaitVal);
 
-	GlobalLog.debugMsg("Exit: CmdExecutor::swap");
+	//GlobalLog.debugMsg("Exit: CmdExecutor::swap");
 }
 
 void CmdExecutor::free() {
-	GlobalLog.debugMsg("Enter: CmdExecutor::free");
+	//GlobalLog.debugMsg("Enter: CmdExecutor::free");
 	for (uint64_t i = 0; i < stages.size(); i++) {
 		waitStage(i);
 	}
@@ -231,25 +231,25 @@ void CmdExecutor::free() {
 	stageFinishedWaitVal.clear();
 	stageFinishedWaitVal.shrink_to_fit();
 
-	GlobalLog.debugMsg("Exit: CmdExecutor::free");
+	//GlobalLog.debugMsg("Exit: CmdExecutor::free");
 }
 
 void CmdExecutor::submit() {
-	GlobalLog.debugMsg("Enter: CmdExecutor::submit");
+	//GlobalLog.debugMsg("Enter: CmdExecutor::submit");
 	
 	for (uint64_t i = 0; i < stages.size(); i++) {
 		submitStage(i);
 	}
 
-	GlobalLog.debugMsg("Exit: CmdExecutor::submit");
+	//GlobalLog.debugMsg("Exit: CmdExecutor::submit");
 }
 
 CmdExecutor::~CmdExecutor() {
-	GlobalLog.debugMsg("Enter: CmdExecutor::~CmdExecutor");
+	//GlobalLog.debugMsg("Enter: CmdExecutor::~CmdExecutor");
 	
 	free();
 
-	GlobalLog.debugMsg("Exit: CmdExecutor::~CmdExecutor");
+	//GlobalLog.debugMsg("Exit: CmdExecutor::~CmdExecutor");
 }
 
 }
