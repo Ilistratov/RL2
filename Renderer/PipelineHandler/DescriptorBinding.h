@@ -5,7 +5,9 @@
 #pragma warning(pop)
 
 namespace Renderer::Pipeline {
-
+/*
+* DEPRICATED
+* 10-03-2021
 class DescriptorBinding {
 	std::vector<vk::DescriptorBufferInfo> buff;
 	std::vector<vk::DescriptorImageInfo> img;
@@ -49,5 +51,6 @@ public:
 	SetBindable(const std::vector<IDescriptorBindable*>& bnd);
 	const std::vector<DescriptorBinding>& getBindings() const;
 };
+*/
 
 }

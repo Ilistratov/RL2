@@ -4,20 +4,20 @@
 
 namespace Renderer::Pipeline {
 Compute::Compute(
-	const DPoolHandler& dPool,
+	const DescriptorHandler::Layout& dLayout,
 	const std::vector<vk::PushConstantRange>& pushConstants,
 	const std::string& shaderFilePath,
 	const std::string& shaderMain
 ) {
-	data.layt = core.device().createPipelineLayout(
+	layt = core.device().createPipelineLayout(
 		vk::PipelineLayoutCreateInfo{
 			vk::PipelineLayoutCreateFlags{},
-			(uint32_t)dPool.getData().layts.size(),
-			dPool.getData().layts.data(),
-			(uint32_t)pushConstants.size(),
-			pushConstants.data()
+			dLayout.getLayouts(),
+			pushConstants
 		}
 	);
+
+	dPool = DescriptorHandler::Pool(dLayout);
 
 	auto shaderModule = loadShader(shaderFilePath);
 	auto res = core.device().createComputePipeline(
@@ -31,7 +31,7 @@ Compute::Compute(
 				shaderMain.c_str(),
 				{}
 			},
-			data.layt,
+			layt,
 			{},
 			-1
 		}
@@ -45,7 +45,7 @@ Compute::Compute(
 		);
 	}
 
-	data.ppln = res.value;
+	ppln = res.value;
 }
 
 Compute::Compute(Compute&& other) {
@@ -62,27 +62,31 @@ void Compute::operator=(Compute&& other) {
 }
 
 void Compute::swap(Compute& other) {
-	std::swap(data, other.data);
+	std::swap(ppln, other.ppln);
+	std::swap(layt, other.layt);
+	dPool.swap(other.dPool);
 }
 
 void Compute::free() {
-	core.device().destroyPipeline(data.ppln);
-	core.device().destroyPipelineLayout(data.layt);
+	core.device().destroyPipeline(ppln);
+	core.device().destroyPipelineLayout(layt);
+	dPool.free();
 
-	data.ppln = vk::Pipeline{};
-	data.layt = vk::PipelineLayout{};
-}
-
-Compute::Data& Compute::getData() {
-	return data;
-}
-
-const Compute::Data& Compute::getData() const {
-	return data;
+	ppln = vk::Pipeline{};
+	layt = vk::PipelineLayout{};
 }
 
 Compute::~Compute() {
 	free();
+}
+
+void Compute::bind(vk::CommandBuffer& cmd) {
+	cmd.bindPipeline(vk::PipelineBindPoint::eCompute, ppln);
+	cmd.bindDescriptorSets(vk::PipelineBindPoint::eCompute, layt, 0, dPool.getSets(), {});
+}
+
+DescriptorHandler::Pool& Compute::getDPool() {
+	return dPool;
 }
 
 }

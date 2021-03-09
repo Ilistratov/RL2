@@ -3,10 +3,10 @@ cmake_minimum_required (VERSION 3.8)
 set(SRCS 
 	Compute.h
 	Compute.cpp
-	DPoolHandler.h
-	DPoolHandler.cpp
-	DescriptorBinding.h
-	DescriptorBinding.cpp
+	# DPoolHandler.h	    |
+	# DPoolHandler.cpp	    | DEPRICATED
+	# DescriptorBinding.h   | 10-03-2021
+	# DescriptorBinding.cpp |
 	LoadShaderModule.h
 	LoadShaderModule.cpp
 )

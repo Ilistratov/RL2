@@ -5,7 +5,9 @@
 #include "DescriptorBinding.h"
 
 namespace Renderer::Pipeline {
-
+/*
+* DEPRICATED
+* 10-03-2021
 class DPoolHandler {
 public:
 	struct Data {
@@ -36,4 +38,5 @@ private:
 	Data data;
 };
 
+*/
 }

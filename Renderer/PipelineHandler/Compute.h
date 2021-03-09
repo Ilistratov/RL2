@@ -6,41 +6,38 @@
 #include <vulkan\vulkan.hpp>
 #pragma warning(pop)
 
-#include "DPoolHandler.h"
+#include "Renderer\DescriptorHandler\Pool.h"
 
 namespace Renderer::Pipeline {
 
 class Compute {
-public:
-	struct Data {
-		vk::Pipeline ppln;
-		vk::PipelineLayout layt;
-	};
+	vk::Pipeline ppln;
+	vk::PipelineLayout layt;
+	DescriptorHandler::Pool dPool;
 
+public:
 	Compute(Compute&) = delete;
 	Compute& operator =(Compute&) = delete;
 
 	Compute() = default;
 	Compute(
-		const DPoolHandler& dPool,
+		const DescriptorHandler::Layout& dLayout,
 		const std::vector<vk::PushConstantRange>& pushConstants,
 		const std::string& shaderFilePath,
 		const std::string& shaderMain
 	);
 
-	Compute(Compute&& other);
-	void operator =(Compute&& other);
-
 	void swap(Compute& other);
 	void free();
 
-	Data& getData();
-	const Data& getData() const;
+	Compute(Compute&& other);
+	void operator =(Compute&& other);
 
 	~Compute();
 
-private:
-	Data data;
+	void bind(vk::CommandBuffer& cmd);
+
+	DescriptorHandler::Pool& getDPool();
 };
 
 }
