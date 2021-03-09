@@ -1,6 +1,8 @@
 ﻿#include <iostream>
 #include <chrono>
 #include <thread>
+#include <mutex>
+#include <atomic>
 #include <tuple>
 #include "Utill\Logger.h"
 #include "Renderer\Core.h"
@@ -69,19 +71,18 @@ using Renderer::Pipeline::DPoolHandler;
 struct PushConstant {
 	uint32_t width;
 	uint32_t height;
-	float center_x;
-	float center_y;
-	float scale;
+	double center_x;
+	double center_y;
+	double scale;
 };
 
-;
-
+std::atomic<uint64_t> render_time;
 bool waitForInput = true;
 std::mutex n_pc_accsess;
 
 void readInput(PushConstant& n_pc) {
 	std::string s;
-	float n_val;
+	double n_val;
 	while (waitForInput && std::cin >> s >> n_val) {
 		if (s == "cx") {
 			std::scoped_lock lock(n_pc_accsess);
@@ -92,23 +93,29 @@ void readInput(PushConstant& n_pc) {
 		} else if (s == "s") {
 			std::scoped_lock lock(n_pc_accsess);
 			n_pc.scale = n_val;
+		} else if (s == "mvx") {
+			n_pc.center_x += n_pc.scale * n_val;
+		} else if (s == "mvy") {
+			n_pc.center_y += n_pc.scale * n_val;
+		} else if (s == "mvs") {
+			n_pc.scale *= n_val;
+		} else if (s == "t") {
+			std::cout << "Render took " << render_time << " ms\n";
 		} else {
-			GlobalLog.warningMsg("Variable name: " + s + " - not recognised");
+			GlobalLog.warningMsg("command " + s + " - not recognised");
 		}
 	}
 }
 
-void update_val(float& val, float d) {
-	if (std::abs(d) > 1e-9) {
-		val += d * 0.01;
-	}
+void update_val(double& val, double d) {
+	val += d * 0.01;
 }
 
 void updateRelevantPc(PushConstant& releventPc, const PushConstant& n_pc) {
 	std::scoped_lock lock(n_pc_accsess);
-	float dcx = n_pc.center_x - releventPc.center_x;
-	float dcy = n_pc.center_y - releventPc.center_y;
-	float ds = n_pc.scale - releventPc.scale;
+	double dcx = n_pc.center_x - releventPc.center_x;
+	double dcy = n_pc.center_y - releventPc.center_y;
+	double ds = n_pc.scale - releventPc.scale;
 	update_val(releventPc.center_x, dcx);
 	update_val(releventPc.center_y, dcy);
 	update_val(releventPc.scale, ds);
@@ -170,29 +177,29 @@ int main(int argc, char* argv[]) {
 						{ 1 },
 						{ vk::PipelineStageFlags(vk::PipelineStageFlagBits::eComputeShader) },
 						{},
-						{ Renderer::core.swapchain().imageAvaliable() },
-						{ vk::PipelineStageFlags(vk::PipelineStageFlagBits::eComputeShader) }
+						{},
+						{}
 					},
 					Renderer::ExecutionStageDescription{
 						&rt[i],
 						{ 0 },
 						{ vk::PipelineStageFlags(vk::PipelineStageFlagBits::eTransfer) },
 						{ rdyToPresent[i] },
-						{},
-						{}
+						{ Renderer::core.swapchain().imageAvaliable() },
+						{ vk::PipelineStageFlags(vk::PipelineStageFlagBits::eTransfer) }
 					}
 				}
 			}
 		);
 	}
 	
-	//std::chrono::high_resolution_clock clock;
-	//auto prv = clock.now();
+	std::chrono::high_resolution_clock clock;
+	auto prv = clock.now();
 
 	while (!glfwWindowShouldClose(Renderer::core.apiBase().window())) {
-		//auto cur = clock.now();
-		//std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(cur - prv).count() << " ms \n";
-		//std::swap(cur, prv);
+		auto cur = clock.now();
+		render_time = std::chrono::duration_cast<std::chrono::milliseconds>(cur - prv).count();
+		std::swap(cur, prv);
 
 		glfwPollEvents();
 		Renderer::core.swapchain().acquireNextImage();

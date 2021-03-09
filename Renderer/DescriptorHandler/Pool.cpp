@@ -22,6 +22,40 @@ Pool::Pool(const Layout& layt) {
 	);
 }
 
+void Pool::swap(Pool& other) {
+	std::swap(pool, other.pool);
+	sets.swap(other.sets);
+}
+
+void Pool::free() {
+	if (!sets.empty()) {
+		core.device().freeDescriptorSets(pool, sets);
+	}
+
+	sets.clear();
+	sets.shrink_to_fit();
+
+	core.device().destroyDescriptorPool(pool);
+	pool = vk::DescriptorPool{};
+}
+
+Pool::Pool(Pool&& other) {
+	swap(other);
+}
+
+void Pool::operator=(Pool&& other) {
+	if (this == &other) {
+		return;
+	}
+
+	swap(other);
+	other.free();
+}
+
+Pool::~Pool() {
+	free();
+}
+
 vk::WriteDescriptorSet makeDescriptorWriteVk(vk::DescriptorSet set, uint32_t bindingId, const DescriptorWrite& write) {
 	if (!write.imageInfo.empty()) {
 		return vk::WriteDescriptorSet{
@@ -64,6 +98,10 @@ void Pool::write(const std::vector<std::vector<DescriptorWrite>>& sWrites) {
 	for (uint32_t i = 0; i < sWrites.size(); i++) {
 		write(i, sWrites[i]);
 	}
+}
+
+const std::vector<vk::DescriptorSet>& Pool::getSets() const {
+	return sets;
 }
 
 }

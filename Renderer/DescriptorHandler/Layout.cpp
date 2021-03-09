@@ -39,4 +39,50 @@ Layout::Layout(const std::vector<std::vector<LayoutBinding>>& bindings) {
 	}
 }
 
+void Layout::swap(Layout& other) {
+	layt.swap(other.layt);
+	size.swap(other.size);
+}
+
+void Layout::free() {
+	for (auto& l : layt) {
+		core.device().destroyDescriptorSetLayout(l);
+	}
+
+	layt.clear();
+	layt.shrink_to_fit();
+
+	size.clear();
+	size.shrink_to_fit();
+}
+
+Layout::Layout(Layout&& other) {
+	swap(other);
+}
+
+void Layout::operator=(Layout&& other) {
+	if (this == &other) {
+		return;
+	}
+
+	swap(other);
+	other.free();
+}
+
+Layout::~Layout() {
+	free();
+}
+
+const std::vector<vk::DescriptorSetLayout>& Layout::getLayouts() const {
+	return layt;
+}
+
+const std::vector<vk::DescriptorPoolSize>& Layout::getSizes() const {
+	return size;
+}
+
+uint32_t Layout::getSetCount() const {
+	return layt.size();
+}
+
 }

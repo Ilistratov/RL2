@@ -14,8 +14,8 @@ struct DescriptorWrite {
 	uint32_t dstArrayElement = {};
 	uint32_t descriptorCount = {};
 	vk::DescriptorType type = {};
-	std::vector<const vk::DescriptorImageInfo> imageInfo = {};
-	std::vector<const vk::DescriptorBufferInfo> bufferInfo = {};
+	std::vector<vk::DescriptorImageInfo> imageInfo = {};
+	std::vector<vk::DescriptorBufferInfo> bufferInfo = {};
 	//std::vector<vk::BufferView> texelBufferView;
 };
 
@@ -50,6 +50,8 @@ public:
 	//DescriptorWrite with descriptorCount = 0 can be supplied, in that case
 	//nothing will be written in the specified set binding
 	void write(const std::vector<std::vector<DescriptorWrite>>& sWrites);
+
+	const std::vector<vk::DescriptorSet>& getSets() const;
 };
 
 }
