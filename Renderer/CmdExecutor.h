@@ -1,12 +1,12 @@
 #pragma once
 
-#include "ICmdRecorder.h"
+#include "CmdRecorder\ICmdRecorder.h"
 #include "ResourceHandler\CommandPool.h"
 
 namespace Renderer {
 
 struct ExecutionStageDescription {
-	ICmdRecorder* recorder;
+	CmdRecorder::ICmdRecorder* recorder;
 	std::vector<uint64_t> internalWait = {};
 	std::vector<vk::PipelineStageFlags> internalWaitStage = {};
 	std::vector<vk::Semaphore> externalSignal = {};
@@ -27,7 +27,7 @@ class CmdExecutor {
 
 	void waitStage(uint64_t stageInd);
 
-	void recordRegular(uint64_t stageInd);
+	void recordStatic(uint64_t stageInd);
 	void recordDynamic(uint64_t stageInd);
 	void submitStage(uint64_t stageInd);
 

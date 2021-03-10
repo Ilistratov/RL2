@@ -140,7 +140,7 @@ vk::ImageMemoryBarrier ImageBase::genLayoutTransitionBarrier(
 		getSubresourceRange()
 	};
 }
-
+/*
 vk::ImageMemoryBarrier ImageBase::genTransferSrcBarrier(
 	vk::ImageLayout srcLayt
 ) {
@@ -173,5 +173,7 @@ vk::ImageMemoryBarrier ImageBase::genShaderRWBarrier(
 		vk::AccessFlagBits::eShaderRead | vk::AccessFlagBits::eShaderWrite
 	);
 }
+*/
+
 
 }

@@ -41,20 +41,30 @@ RenderTarget::~RenderTarget() {
 	free();
 }
 
-vk::ImageMemoryBarrier RenderTarget::genPreRenderBarrier() {
-	return genShaderRWBarrier(vk::ImageLayout::eTransferSrcOptimal);
-}
-
-vk::ImageMemoryBarrier RenderTarget::genPreBlitBarrier() {
-	return genTransferSrcBarrier(vk::ImageLayout::eGeneral);
-}
-
 vk::ImageMemoryBarrier RenderTarget::genInitBarrier() {
-	return genLayoutTransitionBarrier(
+	return genLayoutTransitionBarrier( 
 		vk::ImageLayout::eUndefined,
 		vk::ImageLayout::eGeneral,
 		{},
 		vk::AccessFlagBits::eShaderRead |
+		vk::AccessFlagBits::eShaderWrite
+	);
+}
+
+vk::ImageMemoryBarrier RenderTarget::genPreBlitBarrier() {
+	return genLayoutTransitionBarrier(
+		vk::ImageLayout::eGeneral,
+		vk::ImageLayout::eTransferSrcOptimal,
+		vk::AccessFlagBits::eShaderWrite,
+		vk::AccessFlagBits::eTransferRead
+	);
+}
+
+vk::ImageMemoryBarrier RenderTarget::genPostBlitBarrier() {
+	return genLayoutTransitionBarrier(
+		vk::ImageLayout::eTransferSrcOptimal,
+		vk::ImageLayout::eGeneral,
+		vk::AccessFlagBits::eTransferRead,
 		vk::AccessFlagBits::eShaderWrite
 	);
 }
@@ -68,6 +78,16 @@ vk::ImageBlit RenderTarget::genBlit() {
 	};
 }
 
+CmdRecorder::BlitTarget RenderTarget::getBlitTarget() {
+	return CmdRecorder::BlitTarget{
+		data.img,
+		data.ext,
+		genPreBlitBarrier(),
+		genPostBlitBarrier()
+	};
+}
+
+/*
 void RenderTarget::recordBlit(vk::CommandBuffer cb, ImageBase::Data dst) {
 	cb.blitImage(
 		getData().img,
@@ -78,6 +98,7 @@ void RenderTarget::recordBlit(vk::CommandBuffer cb, ImageBase::Data dst) {
 		vk::Filter::eLinear
 	);
 }
+*/
 
 DescriptorHandler::LayoutBinding RenderTarget::getLayoutBinding(vk::ShaderStageFlags stage) const {
 	return DescriptorHandler::LayoutBinding{

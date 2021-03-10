@@ -24,7 +24,7 @@ void CmdExecutor::waitStage(uint64_t stageInd) {
 	//GlobalLog.debugMsg("Exit: CmdExecutor::waitStage, stage: " + std::to_string(stageInd));
 }
 
-void CmdExecutor::recordRegular(uint64_t stageInd) {
+void CmdExecutor::recordStatic(uint64_t stageInd) {
 	//GlobalLog.debugMsg("Enter: CmdExecutor::recordRegular, stage: " + std::to_string(stageInd));
 	
 	auto& cmd = cmdPool.getData().cmd[stageInd];
@@ -33,7 +33,7 @@ void CmdExecutor::recordRegular(uint64_t stageInd) {
 			vk::CommandBufferUsageFlagBits::eSimultaneousUse
 		}
 	);
-	stages[stageInd].recorder->recordRegular(cmd);
+	stages[stageInd].recorder->recordStatic(cmd);
 	cmd.end();
 
 	//GlobalLog.debugMsg("Exit: CmdExecutor::recordRegular, stage: " + std::to_string(stageInd));
@@ -158,7 +158,7 @@ CmdExecutor::CmdExecutor(
 	core.device().destroyFence(initFinished);
 
 	for (uint64_t i = 0; i < stages.size(); i++) {
-		recordRegular(i);
+		recordStatic(i);
 	}
 
 	for (uint64_t i = 0; i < stages.size(); i++) {

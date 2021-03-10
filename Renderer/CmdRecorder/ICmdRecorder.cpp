@@ -1,13 +1,10 @@
-#include "Core.h"
 #include "ICmdRecorder.h"
 
-namespace Renderer {
-
-
+namespace Renderer::CmdRecorder {
 
 void ICmdRecorder::recordInit(vk::CommandBuffer cmd) {}
 
-void ICmdRecorder::recordRegular(vk::CommandBuffer cmd) {}
+void ICmdRecorder::recordStatic(vk::CommandBuffer cmd) {}
 
 void ICmdRecorder::recordDynamic(vk::CommandBuffer cmd) {}
 
@@ -19,9 +16,9 @@ void CompositCmdRecorder::recordInit(vk::CommandBuffer cmd) {
 	}
 }
 
-void CompositCmdRecorder::recordRegular(vk::CommandBuffer cmd) {
+void CompositCmdRecorder::recordStatic(vk::CommandBuffer cmd) {
 	for (auto recorder : cmdRecorders) {
-		recorder->recordRegular(cmd);
+		recorder->recordStatic(cmd);
 	}
 }
 

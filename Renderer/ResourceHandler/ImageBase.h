@@ -15,6 +15,7 @@ protected:
 		vk::AccessFlags dstAccess
 	);
 
+	/*
 	vk::ImageMemoryBarrier genTransferSrcBarrier(
 		vk::ImageLayout srcLayt
 	);
@@ -26,6 +27,7 @@ protected:
 	vk::ImageMemoryBarrier genShaderRWBarrier(
 		vk::ImageLayout srcLayt
 	);
+	*/
 
 public:
 	struct Data {

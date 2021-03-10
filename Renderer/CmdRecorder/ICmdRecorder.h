@@ -6,7 +6,7 @@
 #include <vulkan\vulkan.hpp>
 #pragma warning(pop)
 
-namespace Renderer {
+namespace Renderer::CmdRecorder {
 
 //Represents object
 //that can be used as shader input
@@ -21,7 +21,7 @@ public:
 	//this call
 	virtual void recordInit(vk::CommandBuffer cmd);
 
-	virtual void recordRegular(vk::CommandBuffer cmd);
+	virtual void recordStatic(vk::CommandBuffer cmd);
 	virtual void recordDynamic(vk::CommandBuffer cmd);
 };
 
@@ -33,7 +33,7 @@ public:
 
 	void recordInit(vk::CommandBuffer cmd) override;
 
-	void recordRegular(vk::CommandBuffer cmd) override;
+	void recordStatic(vk::CommandBuffer cmd) override;
 	void recordDynamic(vk::CommandBuffer cmd) override;
 };
 

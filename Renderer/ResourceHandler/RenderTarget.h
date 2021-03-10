@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ImageBase.h"
+#include "Renderer\CmdRecorder\BlitRecorder.h"
 #include "Renderer\DescriptorHandler\Pool.h"
 
 namespace Renderer::ResourceHandler {
@@ -24,12 +25,14 @@ public:
 
 	~RenderTarget();
 
-	vk::ImageMemoryBarrier genPreRenderBarrier();
-	vk::ImageMemoryBarrier genPreBlitBarrier();
 	vk::ImageMemoryBarrier genInitBarrier();
+	vk::ImageMemoryBarrier genPreBlitBarrier();
+	vk::ImageMemoryBarrier genPostBlitBarrier();
 	
 	vk::ImageBlit genBlit();
-	void recordBlit(vk::CommandBuffer cb, ImageBase::Data dst);
+
+	CmdRecorder::BlitTarget getBlitTarget();
+	//void recordBlit(vk::CommandBuffer cb, ImageBase::Data dst);
 
 	DescriptorHandler::LayoutBinding getLayoutBinding(vk::ShaderStageFlags stage = vk::ShaderStageFlagBits::eAll) const;
 	DescriptorHandler::DescriptorWrite getDescriptorWrite() const;
