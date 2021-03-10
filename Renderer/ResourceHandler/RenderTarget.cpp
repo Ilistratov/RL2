@@ -1,3 +1,4 @@
+#include "Renderer\Core.h"
 #include "RenderTarget.h"
 
 namespace Renderer::ResourceHandler {
@@ -11,7 +12,34 @@ RenderTarget::RenderTarget(
 	vk::ImageUsageFlagBits::eStorage |
 	vk::ImageUsageFlagBits::eTransferSrc,
 	vk::MemoryPropertyFlagBits::eDeviceLocal
-) {}
+), imgView(ImageBase::createImageView()) {}
+
+void RenderTarget::swap(RenderTarget& other) {
+	ImageBase::swap(other);
+	std::swap(imgView, other.imgView);
+}
+
+void RenderTarget::free() {
+	core.device().destroyImageView(imgView);
+	ImageBase::free();
+}
+
+RenderTarget::RenderTarget(RenderTarget&& other) {
+	swap(other);
+}
+
+void RenderTarget::operator =(RenderTarget&& other) {
+	if (this == &other) {
+		return;
+	}
+
+	swap(other);
+	other.free();
+}
+
+RenderTarget::~RenderTarget() {
+	free();
+}
 
 vk::ImageMemoryBarrier RenderTarget::genPreRenderBarrier() {
 	return genShaderRWBarrier(vk::ImageLayout::eTransferSrcOptimal);
@@ -49,6 +77,23 @@ void RenderTarget::recordBlit(vk::CommandBuffer cb, ImageBase::Data dst) {
 		genBlit(),
 		vk::Filter::eLinear
 	);
+}
+
+DescriptorHandler::LayoutBinding RenderTarget::getLayoutBinding(vk::ShaderStageFlags stage) const {
+	return DescriptorHandler::LayoutBinding{
+		vk::DescriptorType::eStorageImage,
+		1,
+		stage
+	};
+}
+
+DescriptorHandler::DescriptorWrite RenderTarget::getDescriptorWrite() const {
+	return DescriptorHandler::DescriptorWrite{
+		0,
+		1,
+		vk::DescriptorType::eStorageImage,
+		{ vk::DescriptorImageInfo{ {}, imgView, vk::ImageLayout::eGeneral } }
+	};
 }
 
 }

@@ -2,7 +2,9 @@
 #include <cassert>
 
 namespace Renderer::Pipeline {
-
+/*
+* DEPRICATED
+* 10-03-2021
 DescriptorBinding::DescriptorBinding(
 	std::vector<vk::DescriptorBufferInfo> buff,
 	std::vector<vk::DescriptorImageInfo> img,
@@ -60,4 +62,5 @@ const std::vector<DescriptorBinding>& SetBindable::getBindings() const {
 	return bindings;
 }
 
+*/
 }

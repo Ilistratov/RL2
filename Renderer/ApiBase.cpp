@@ -196,6 +196,16 @@ bool checkDeviceRequieredPropertiesProvided(vk::PhysicalDevice device, vk::Surfa
 		return false;
 	}
 
+	if (!device_features.shaderFloat64) {
+		GlobalLog.debugMsg("No shaderFloat64 shader feature");
+		return false;
+	}
+
+	if (!device_features.shaderInt64) {
+		GlobalLog.debugMsg("No shaderInt64 shader feature");
+		return false;
+	}
+
 	//if (!device_features.samplerAnisotropy) {
 	//	return false;
 	//}
@@ -334,6 +344,8 @@ void ApiBase::createDevice(
 
 	vk::PhysicalDeviceFeatures ph_dvc_ftr;
 	ph_dvc_ftr.shaderStorageImageWriteWithoutFormat = true;
+	ph_dvc_ftr.shaderFloat64 = true;
+	ph_dvc_ftr.shaderInt64 = true;
 
 	vk::DeviceCreateInfo ci{};
 	ci.enabledExtensionCount = (uint32_t)deviceExt.size();

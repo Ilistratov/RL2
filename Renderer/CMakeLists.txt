@@ -1,5 +1,6 @@
 cmake_minimum_required (VERSION 3.8)
 
+add_subdirectory(DescriptorHandler)
 add_subdirectory(ResourceHandler)
 add_subdirectory(PipelineHandler)
 add_subdirectory(ShaderBindable)
@@ -22,11 +23,13 @@ add_library(Renderer ${SRCS})
 
 set_property(TARGET Renderer PROPERTY CXX_STANDARD 17)
 
+add_dependencies(Renderer DescriptorHandler)
 add_dependencies(Renderer ResourceHandler)
 add_dependencies(Renderer PipelineHandler)
 add_dependencies(Renderer ShaderBindable)
 add_dependencies(Renderer ShaderHandler)
 
+target_link_libraries(Renderer DescriptorHandler)
 target_link_libraries(Renderer ResourceHandler)
 target_link_libraries(Renderer PipelineHandler)
 target_link_libraries(Renderer ShaderBindable)

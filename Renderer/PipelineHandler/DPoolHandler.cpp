@@ -5,7 +5,9 @@
 #include "DPoolHandler.h"
 
 namespace Renderer::Pipeline {
-
+/*
+* DEPRICATED
+* 10-03-2021
 DPoolHandler::DPoolHandler(
 	const std::vector<SetBindable>& setBindables
 ) {
@@ -117,5 +119,6 @@ void DPoolHandler::free() {
 
 	data.pool = vk::DescriptorPool{};
 }
+*/
 
 }
