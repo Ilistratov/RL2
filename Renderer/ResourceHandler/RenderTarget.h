@@ -1,10 +1,13 @@
 #pragma once
 
 #include "ImageBase.h"
+#include "Renderer\DescriptorHandler\Pool.h"
 
 namespace Renderer::ResourceHandler {
 
 class RenderTarget : public ImageBase {
+	vk::ImageView imgView = {};
+
 public:
 	RenderTarget() = default;
 
@@ -13,12 +16,23 @@ public:
 		vk::Format fmt
 	);
 
+	void swap(RenderTarget& other);
+	void free();
+
+	RenderTarget(RenderTarget&& other);
+	void operator =(RenderTarget&& other);
+
+	~RenderTarget();
+
 	vk::ImageMemoryBarrier genPreRenderBarrier();
 	vk::ImageMemoryBarrier genPreBlitBarrier();
 	vk::ImageMemoryBarrier genInitBarrier();
 	
 	vk::ImageBlit genBlit();
 	void recordBlit(vk::CommandBuffer cb, ImageBase::Data dst);
+
+	DescriptorHandler::LayoutBinding getLayoutBinding(vk::ShaderStageFlags stage = vk::ShaderStageFlagBits::eAll) const;
+	DescriptorHandler::DescriptorWrite getDescriptorWrite() const;
 };
 
 }

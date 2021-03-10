@@ -2,6 +2,7 @@
 
 #include <vector>
 
+#include "Renderer\DescriptorHandler\Pool.h"
 #include "BufferBase.h"
 
 namespace Renderer::ResourceHandler {
@@ -25,6 +26,9 @@ public:
 		vk::BufferUsageFlagBits specificUsage = {}
 	);
 
+	void swap(StructuredBuffer& other);
+	void free();
+
 	StructuredBuffer(StructuredBuffer&& other);
 	void operator =(StructuredBuffer&& other);
 
@@ -38,8 +42,8 @@ public:
 
 	vk::BufferMemoryBarrier genUploadBarrier();
 
-	void swap(StructuredBuffer& other);
-	void free();
+	DescriptorHandler::LayoutBinding getLayoutBinding(vk::ShaderStageFlags stage = vk::ShaderStageFlagBits::eAll) const;
+	DescriptorHandler::DescriptorWrite getDescriptorWrite() const;
 };
 
 }

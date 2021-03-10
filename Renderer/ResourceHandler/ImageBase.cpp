@@ -50,15 +50,15 @@ ImageBase::ImageBase(ImageBase&& other) {
 }
 
 void ImageBase::operator=(ImageBase&& other) {
+	if (this == &other) {
+		return;
+	}
+
 	swap(other);
 	other.free();
 }
 
 void ImageBase::swap(ImageBase& other) {
-	if (this == &other) {
-		return;
-	}
-
 	std::swap(data, other.data);
 }
 
@@ -137,13 +137,7 @@ vk::ImageMemoryBarrier ImageBase::genLayoutTransitionBarrier(
 		{VK_QUEUE_FAMILY_IGNORED},
 		{VK_QUEUE_FAMILY_IGNORED},
 		data.img,
-		vk::ImageSubresourceRange{
-			vk::ImageAspectFlagBits::eColor,
-			0,
-			1,
-			0,
-			1
-		}
+		getSubresourceRange()
 	};
 }
 

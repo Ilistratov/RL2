@@ -71,6 +71,24 @@ vk::BufferMemoryBarrier StructuredBuffer::genUploadBarrier() {
 	return genMemoryBarrier(vk::AccessFlagBits::eTransferWrite, vk::AccessFlagBits::eShaderRead);
 }
 
+DescriptorHandler::LayoutBinding StructuredBuffer::getLayoutBinding(vk::ShaderStageFlags stage) const {
+	return DescriptorHandler::LayoutBinding{
+		vk::DescriptorType::eStorageBuffer,
+		1,
+		stage
+	};
+}
+
+DescriptorHandler::DescriptorWrite StructuredBuffer::getDescriptorWrite() const {
+	return DescriptorHandler::DescriptorWrite{
+		0,
+		1,
+		vk::DescriptorType::eStorageBuffer,
+		{},
+		{ vk::DescriptorBufferInfo{ BufferBase::data.buff, 0, VK_WHOLE_SIZE } }
+	};
+}
+
 void StructuredBuffer::swap(StructuredBuffer& other) {
 	BufferBase::swap(other);
 	std::swap(count, other.count);
