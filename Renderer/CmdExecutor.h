@@ -6,7 +6,8 @@
 namespace Renderer {
 
 struct ExecutionStageDescription {
-	CmdRecorder::ICmdRecorder* recorder;
+	CmdRecorder::ICmdRecorder* cmdStatic = nullptr;
+	CmdRecorder::ICmdRecorder* cmdDynamic = nullptr;
 	std::vector<uint64_t> internalWait = {};
 	std::vector<vk::PipelineStageFlags> internalWaitStage = {};
 	std::vector<vk::Semaphore> externalSignal = {};
@@ -36,7 +37,10 @@ public:
 	CmdExecutor& operator =(const CmdExecutor&) = delete;
 	
 	CmdExecutor() = default;
-	CmdExecutor(std::vector<ExecutionStageDescription>&& stageDescriptions);
+	CmdExecutor(
+		std::vector<CmdRecorder::ICmdRecorder*> initRecorders,
+		std::vector<ExecutionStageDescription>&& stageDescriptions
+	);
 
 	CmdExecutor(CmdExecutor&& other);
 	void operator =(CmdExecutor&& other);

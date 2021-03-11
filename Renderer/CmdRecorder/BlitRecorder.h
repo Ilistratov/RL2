@@ -1,21 +1,22 @@
 #pragma once
 
 #include "ICmdRecorder.h"
+#include "ImgBarrierRecorder.h"
 
 namespace Renderer::CmdRecorder {
 
 struct BlitTarget {
 	vk::Image img;
-	vk::Extent2D ext;
 	vk::ImageMemoryBarrier preBlit;
 	vk::ImageMemoryBarrier postBlit;
 };
 
 class BlitRecorder : public ICmdRecorder {
-	BlitTarget src;
-	BlitTarget dst;
+	ImgBarrierRecorder preBlit;
+	ImgBarrierRecorder postBlit;
 	vk::ImageBlit blit;
-	vk::PipelineStageFlags renderingStage;
+	vk::Image src;
+	vk::Image dst;
 
 public:
 	BlitRecorder() = default;
@@ -27,7 +28,8 @@ public:
 		vk::PipelineStageFlags renderingStage = vk::PipelineStageFlagBits::eComputeShader
 	);
 
-	void recordStatic(vk::CommandBuffer cmd) override;
+	void recordBlit(vk::CommandBuffer cmd);
+	void record(vk::CommandBuffer cmd) override;
 };
 
 }

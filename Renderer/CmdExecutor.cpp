@@ -33,7 +33,7 @@ void CmdExecutor::recordStatic(uint64_t stageInd) {
 			vk::CommandBufferUsageFlagBits::eSimultaneousUse
 		}
 	);
-	stages[stageInd].recorder->recordStatic(cmd);
+	stages[stageInd].cmdStatic->record(cmd);
 	cmd.end();
 
 	//GlobalLog.debugMsg("Exit: CmdExecutor::recordRegular, stage: " + std::to_string(stageInd));
@@ -52,7 +52,7 @@ void CmdExecutor::recordDynamic(uint64_t stageInd) {
 			vk::CommandBufferUsageFlagBits::eOneTimeSubmit
 		}
 	);
-	stages[stageInd].recorder->recordDynamic(cmd);
+	stages[stageInd].cmdDynamic->record(cmd);
 	cmd.end();
 
 	//GlobalLog.debugMsg("Exit: CmdExecutor::recordDynamic, stage: " + std::to_string(stageInd));
@@ -119,6 +119,7 @@ void CmdExecutor::submitStage(uint64_t stageInd) {
 }
 
 CmdExecutor::CmdExecutor(
+	std::vector<CmdRecorder::ICmdRecorder*> initRecorders,
 	std::vector<ExecutionStageDescription>&& stageDescriptions
 ) : stages(stageDescriptions),
 	cmdPool(core.apiBase().queueInd(vk::QueueFlagBits::eCompute)),
@@ -135,8 +136,8 @@ CmdExecutor::CmdExecutor(
 		}
 	);
 
-	for (uint64_t i = 0; i < stages.size(); i++) {
-		stages[i].recorder->recordInit(cmdInit);
+	for (auto recorder : initRecorders) {
+		recorder->record(cmdInit);
 	}
 
 	cmdInit.end();

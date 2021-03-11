@@ -7,38 +7,36 @@ BlitRecorder::BlitRecorder(
 	BlitTarget dst,
 	vk::ImageBlit blit,
 	vk::PipelineStageFlags renderingStage
-) : src(src),
-	dst(dst),
-	blit(blit),
-	renderingStage(renderingStage) {}
-
-void BlitRecorder::recordStatic(vk::CommandBuffer cmd) {
-	cmd.pipelineBarrier(
+) : preBlit(
 		renderingStage,
 		vk::PipelineStageFlagBits::eTransfer,
-		{},
-		{},
-		{},
 		{ src.preBlit, dst.preBlit }
-	);
+	),
+	blit(blit),
+	postBlit(
+		vk::PipelineStageFlagBits::eTransfer,
+		renderingStage,
+		{ src.postBlit, dst.postBlit }
+	),
+	src(src.img),
+	dst(dst.img) {}
 
+void BlitRecorder::recordBlit(vk::CommandBuffer cmd) {
+	preBlit.recordBarriers(cmd);
 	cmd.blitImage(
-		src.img,
+		src,
 		vk::ImageLayout::eTransferSrcOptimal,
-		dst.img,
+		dst,
 		vk::ImageLayout::eTransferDstOptimal,
 		blit,
 		vk::Filter::eLinear
 	);
+	
+	postBlit.recordBarriers(cmd);
+}
 
-	cmd.pipelineBarrier(
-		vk::PipelineStageFlagBits::eTransfer,
-		renderingStage,
-		{},
-		{},
-		{},
-		{ src.postBlit, dst.postBlit }
-	);
+void BlitRecorder::record(vk::CommandBuffer cmd) {
+	recordBlit(cmd);
 }
 
 }

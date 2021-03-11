@@ -5,6 +5,8 @@ set(SRCS
 	ICmdRecorder.cpp
 	BlitRecorder.h
 	BlitRecorder.cpp
+	ImgBarrierRecorder.h
+	ImgBarrierRecorder.cpp
 )
 
 add_library(CmdRecorder ${SRCS})
