@@ -7,6 +7,7 @@
 #pragma warning(pop)
 
 #include "Renderer\DescriptorHandler\Pool.h"
+#include "Renderer\ResourceHandler\PushConstant.h"
 
 namespace Renderer::Pipeline {
 
@@ -22,7 +23,7 @@ public:
 	Compute() = default;
 	Compute(
 		const DescriptorHandler::Layout& dLayout,
-		const std::vector<vk::PushConstantRange>& pushConstants,
+		const std::vector<ResourceHandler::IPushConstant*>& pushConstants,
 		const std::string& shaderFilePath,
 		const std::string& shaderMain
 	);

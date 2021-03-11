@@ -1,8 +1,8 @@
 #include "Renderer\Core.h"
 #include "PushConstant.h"
 
-namespace Renderer::ShaderBindable {
-
+namespace Renderer::ResourceHandler {
+/*
 PushConstantController::PushConstantController(std::vector<IPushConstant*> pushConstants) : pushConstants(pushConstants) {
 	uint64_t curOffset = 0;
 
@@ -41,5 +41,6 @@ std::vector<vk::PushConstantRange> PushConstantController::getPCR() {
 
 	return res;
 }
+*/
 
 }

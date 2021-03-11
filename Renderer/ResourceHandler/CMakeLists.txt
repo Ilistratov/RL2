@@ -13,6 +13,8 @@ set(SRCS
 	ImageBase.cpp
 	RenderTarget.h
 	RenderTarget.cpp
+	PushConstant.h
+	PushConstant.cpp
 )
 
 add_library(ResourceHandler ${SRCS})

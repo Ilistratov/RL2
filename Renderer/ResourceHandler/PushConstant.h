@@ -3,9 +3,11 @@
 #include <mutex>
 #include <vector>
 
-#include "Renderer\ICmdRecorder.h"
+#pragma warning(push, 0)
+#include <vulkan\vulkan.hpp>
+#pragma warning(pop)
 
-namespace Renderer::ShaderBindable {
+namespace Renderer::ResourceHandler {
 
 class IPushConstant {
 public:
@@ -69,7 +71,7 @@ public:
 		upd = true;
 	}
 };
-
+/*
 class PushConstantController : public ICmdRecorder {
 	std::vector<IPushConstant*> pushConstants;
 	vk::PipelineLayout boundLayt;
@@ -84,5 +86,6 @@ public:
 	void recordDynamic(vk::CommandBuffer cmd) override;
 	void recordInit(vk::CommandBuffer cmd) override;
 };
+*/
 
 }

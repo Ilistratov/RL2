@@ -5,8 +5,6 @@ set(SRCS
 	StructuredBuffer.h
 	RenderTarget.cpp
 	RenderTarget.h
-	PushConstant.cpp
-	PushConstant.h
 )
 
 add_library(ShaderBindable ${SRCS})

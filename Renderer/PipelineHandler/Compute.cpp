@@ -5,15 +5,24 @@
 namespace Renderer::Pipeline {
 Compute::Compute(
 	const DescriptorHandler::Layout& dLayout,
-	const std::vector<vk::PushConstantRange>& pushConstants,
+	const std::vector<ResourceHandler::IPushConstant*>& pushConstants,
 	const std::string& shaderFilePath,
 	const std::string& shaderMain
 ) {
+	std::vector<vk::PushConstantRange> pcRanges(pushConstants.size());
+	uint64_t cur_offset = 0;
+	
+	for (uint64_t i = 0; i < pushConstants.size(); i++) {
+		pushConstants[i]->setOffset(cur_offset);
+		cur_offset += pushConstants[i]->getSize();
+		pcRanges[i] = pushConstants[i]->getPCR();
+	}
+
 	layt = core.device().createPipelineLayout(
-		vk::PipelineLayoutCreateInfo{
+		vk::PipelineLayoutCreateInfo {
 			vk::PipelineLayoutCreateFlags{},
 			dLayout.getLayouts(),
-			pushConstants
+			pcRanges
 		}
 	);
 
