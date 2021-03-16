@@ -5,14 +5,14 @@ set(SRCS
 	CommandPool.cpp
 	BufferBase.h
 	BufferBase.cpp
-	StagingBuffer.cpp
-	StagingBuffer.h
-	StructuredBuffer.h
-	StructuredBuffer.cpp
+#	StagingBuffer.cpp
+#	StagingBuffer.h
+#	StructuredBuffer.h
+#	StructuredBuffer.cpp
 	ImageBase.h
 	ImageBase.cpp
-	RenderTarget.h
-	RenderTarget.cpp
+#	RenderTarget.h
+#	RenderTarget.cpp
 	PushConstant.h
 	PushConstant.cpp
 )
